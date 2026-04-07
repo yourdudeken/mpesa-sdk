@@ -2,24 +2,37 @@
 
 ## Repository Structure
 
-Multi-language Mpesa Daraja SDK. Each SDK is in `sdk/{Language}/`:
-- **PHP**: Laravel package (main focus) - `sdk/PHP/`
-- **Node.js**: TypeScript SDK - `sdk/Node.js/`
-- **Python**: SDK - `sdk/Python/`
-- **Go, Java, C#**: Stub implementations
+Multi-language Mpesa Daraja SDK in `packages/{Language}/`:
+- **PHP**: Laravel package - `packages/php/` (main focus, tested in CI)
+- **Node.js**: TypeScript SDK - `packages/node/`
+- **Python**: SDK - `packages/python/`
+- **Java**: Stub - `packages/java/`
+- **C#**: Stub - `packages/dotnet/`
+- **Go**: Stub - `packages/go/`
+
+## Package Names
+
+| Language | Package Name |
+|----------|--------------|
+| Node.js | @yourdudeken/mpesa-sdk |
+| Python | yourdudeken-mpesa-sdk |
+| PHP | yourdudeken/mpesa-sdk |
+| Java | com.yourdudeken.mpesa |
+| C# | Yourdudeken.Mpesa |
+| Go | github.com/yourdudeken/mpesa-sdk |
 
 ## Commands
 
 ### PHP (Laravel)
 ```bash
-cd sdk/PHP
+cd packages/php
 composer install
 composer test          # runs Pest tests
 ```
 
 ### Node.js
 ```bash
-cd sdk/Node.js
+cd packages/node
 npm install
 npm run build          # TypeScript compilation
 npm test               # Jest tests
@@ -27,9 +40,8 @@ npm test               # Jest tests
 
 ### Python
 ```bash
-cd sdk/Python
+cd packages/python
 pip install -e .
-# No test script defined
 ```
 
 ## Testing
@@ -39,10 +51,10 @@ pip install -e .
 
 ## Key Files
 
-- `config/mpesa.php` - PHP Laravel config (publish via `php artisan mpesa:install`)
-- `src/Mpesa.php` - Main PHP SDK class
-- `src/index.ts` - Node.js entrypoint
-- `src/yourdudeken_mpesa_sdk/mpesa.py` - Python SDK
+- `packages/php/src/Mpesa.php` - Main PHP SDK class
+- `packages/php/config/mpesa.php` - Laravel config (publish via `php artisan mpesa:install`)
+- `packages/node/src/core/MpesaClient.ts` - Node.js entrypoint
+- `packages/python/src/yourdudeken_mpesa_sdk/client.py` - Python SDK
 
 ## Environment
 
