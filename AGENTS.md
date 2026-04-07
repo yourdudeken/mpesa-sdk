@@ -21,6 +21,107 @@ Multi-language Mpesa Daraja SDK in `packages/{Language}/`:
 | C# | Yourdudeken.Mpesa |
 | Go | github.com/yourdudeken/mpesa-sdk |
 
+## Directory Structure
+
+### PHP (`packages/php/`)
+```
+php/
+├── src/
+│   ├── Config/MpesaConfig.php
+│   ├── Services/
+│   │   ├── STKPushService.php
+│   │   ├── B2CService.php
+│   │   ├── B2BService.php
+│   │   ├── C2BService.php
+│   │   ├── AccountService.php
+│   │   └── B2PochiService.php
+│   ├── Http/Client.php
+│   ├── Helpers/Signature.php
+│   ├── Exceptions/MpesaException.php
+│   ├── Facades/Mpesa.php
+│   ├── Console/InstallMpesaPackage.php
+│   └── certificates/
+├── config/mpesa.php
+├── tests/
+├── composer.json
+└── phpunit.xml
+```
+
+### Node.js (`packages/node/`)
+```
+node/
+├── src/
+│   ├── core/
+│   │   ├── MpesaClient.ts
+│   │   └── Config.ts
+│   ├── services/
+│   ├── http/
+│   ├── types/
+│   ├── utils/
+│   ├── errors/
+│   └── certificates/
+├── tests/
+├── package.json
+└── tsconfig.json
+```
+
+### Python (`packages/python/`)
+```
+python/
+├── src/yourdudeken_mpesa_sdk/
+│   ├── client.py
+│   ├── config.py
+│   ├── services/
+│   ├── http/
+│   ├── certificates/
+│   └── __init__.py
+├── tests/
+├── pyproject.toml
+└── setup.py
+```
+
+### Java (`packages/java/`)
+```
+java/
+├── src/main/java/com/yourdudeken/mpesa/
+│   ├── MpesaClient.java
+│   ├── config/
+│   ├── auth/
+│   ├── services/
+│   ├── http/
+│   ├── exceptions/
+│   └── models/
+├── src/test/
+├── pom.xml
+└── src/main/resources/
+```
+
+### C# (`packages/dotnet/`)
+```
+dotnet/
+├── src/Yourdudeken.Mpesa/
+│   ├── MpesaClient.cs
+│   ├── Config/
+│   ├── Auth/
+│   ├── Services/
+│   ├── Http/
+│   └── Exceptions/
+├── tests/
+└── MpesaSdk.csproj
+```
+
+### Go (`packages/go/`)
+```
+go/
+├── mpesa/
+│   ├── client.go
+│   ├── config.go
+│   ├── services/
+│   └── http/
+├── go.mod
+└── certificates/
+```
+
 ## Commands
 
 ### PHP (Laravel)
