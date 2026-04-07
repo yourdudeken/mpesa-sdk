@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Yourdudeken.Mpesa</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Kennedy Muthengi</Authors>
+    <Company>Yourdudeken</Company>
+    <Product>Mpesa SDK</Product>
+    <Description>A C# SDK for Mpesa Daraja APIs</Description>
+    <PackageProjectUrl>https://github.com/yourdudeken/mpesa</PackageProjectUrl>
+    <License>MIT</License>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
