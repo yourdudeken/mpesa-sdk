@@ -57,4 +57,8 @@ Python naming follows snake_case consistently (including `c2b_register_urls`).
 
 ## Notable Gaps
 - No CI workflows exist (`.github/workflows/` is empty).
-- `examplea/` directory exists but is empty.
+
+## Examples & Docs
+- `examplea/` — runnable examples for each SDK (Node.js, Python, Go). Set env vars before running.
+- `docs/configuration.md` — config reference across languages.
+- `docs/callbacks.md` — callback URL setup and resolution order.
