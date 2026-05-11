@@ -44,11 +44,10 @@ When the SDK builds the API request, it resolves each callback URL in this order
 const mpesa = new Mpesa({
   // ...
   callbacks: {
-    callbackUrl: 'https://api.example.com/mpesa/callback',
-    b2cResultUrl: 'https://api.example.com/mpesa/b2c/result',
-    b2cTimeoutUrl: 'https://api.example.com/mpesa/b2c/timeout',
-    statusResultUrl: 'https://api.example.com/mpesa/status/result',
-    // ... (use either camelCase or snake_case keys)
+    callback_url: 'https://api.example.com/mpesa/callback',
+    b2c_result_url: 'https://api.example.com/mpesa/b2c/result',
+    b2c_timeout_url: 'https://api.example.com/mpesa/b2c/timeout',
+    status_result_url: 'https://api.example.com/mpesa/status/result',
   },
 });
 

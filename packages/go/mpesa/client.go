@@ -73,25 +73,27 @@ func (m *Mpesa) lipaNaMpesaPassword() string {
 	return base64.StdEncoding.EncodeToString([]byte(password))
 }
 
-func (m *Mpesa) securityCredential() string {
-	cred, err := m.generateSecurityCredential()
-	if err != nil {
-		return ""
-	}
-	return cred
+func (m *Mpesa) securityCredential() (string, error) {
+	return m.generateSecurityCredential()
 }
 
 func (m *Mpesa) generateSecurityCredential() (string, error) {
 
 	certPath := "certificates/SandboxCertificate.cer"
+	flatPath := "SandboxCertificate.cer"
 	if m.config.Environment == "production" {
 		certPath = "certificates/ProductionCertificate.cer"
+		flatPath = "ProductionCertificate.cer"
 	}
 
 	wd, _ := os.Getwd()
 	paths := []string{
 		certPath,
+		flatPath,
+		"../" + flatPath,
 		filepath.Join(wd, certPath),
+		filepath.Join(wd, flatPath),
+		filepath.Join(wd, "..", flatPath),
 	}
 
 	var pubKeyData []byte
@@ -205,9 +207,13 @@ func (m *Mpesa) Stkquery(checkoutRequestID string, callbackURL string) (map[stri
 
 func (m *Mpesa) B2c(phonenumber string, commandId string, amount int, remarks string) (map[string]interface{}, error) {
 	url := m.baseURL + "/mpesa/b2c/v1/paymentrequest"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"InitiatorName":      m.config.InitiatorName,
-		"SecurityCredential": m.securityCredential(),
+		"SecurityCredential": cred,
 		"CommandID":          commandId,
 		"Amount":             amount,
 		"PartyA":             m.config.B2cShortcode,
@@ -223,9 +229,13 @@ func (m *Mpesa) B2c(phonenumber string, commandId string, amount int, remarks st
 
 func (m *Mpesa) Validated_b2c(phonenumber string, commandId string, amount int, remarks string, idNumber string) (map[string]interface{}, error) {
 	url := m.baseURL + "/mpesa/b2cvalidate/v2/paymentrequest"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"InitiatorName":            m.config.InitiatorName,
-		"SecurityCredential":       m.securityCredential(),
+		"SecurityCredential":       cred,
 		"CommandID":                commandId,
 		"Amount":                   amount,
 		"PartyA":                   m.config.B2cShortcode,
@@ -248,9 +258,13 @@ func (m *Mpesa) B2b(receiverShortcode string, commandId string, amount int, rema
 	}
 
 	url := m.baseURL + "/mpesa/b2b/v1/paymentrequest"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"Initiator":              m.config.InitiatorName,
-		"SecurityCredential":     m.securityCredential(),
+		"SecurityCredential":     cred,
 		"CommandID":              commandId,
 		"SenderIdentifierType":   "4",
 		"RecieverIdentifierType": "4",
@@ -296,9 +310,13 @@ func (m *Mpesa) C2bsimulate(phonenumber string, amount int, shortcode string, co
 
 func (m *Mpesa) AccountBalance(shortcode string, identifierType int, remarks string) (map[string]interface{}, error) {
 	url := m.baseURL + "/mpesa/accountbalance/v1/query"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"Initiator":          m.config.InitiatorName,
-		"SecurityCredential": m.securityCredential(),
+		"SecurityCredential": cred,
 		"CommandID":          "AccountBalance",
 		"PartyA":             shortcode,
 		"IdentifierType":     identifierType,
@@ -312,9 +330,13 @@ func (m *Mpesa) AccountBalance(shortcode string, identifierType int, remarks str
 
 func (m *Mpesa) TransactionStatus(shortcode string, transactionId string, identifierType int, remarks string) (map[string]interface{}, error) {
 	url := m.baseURL + "/mpesa/transactionstatus/v1/query"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"Initiator":          m.config.InitiatorName,
-		"SecurityCredential": m.securityCredential(),
+		"SecurityCredential": cred,
 		"CommandID":          "TransactionStatusQuery",
 		"TransactionID":      transactionId,
 		"PartyA":             shortcode,
@@ -330,9 +352,13 @@ func (m *Mpesa) TransactionStatus(shortcode string, transactionId string, identi
 
 func (m *Mpesa) Reversal(shortcode string, transactionId string, amount int, remarks string) (map[string]interface{}, error) {
 	url := m.baseURL + "/mpesa/reversal/v1/request"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"Initiator":              m.config.InitiatorName,
-		"SecurityCredential":     m.securityCredential(),
+		"SecurityCredential":     cred,
 		"CommandID":              "TransactionReversal",
 		"TransactionID":          transactionId,
 		"Amount":                 amount,
@@ -349,10 +375,14 @@ func (m *Mpesa) Reversal(shortcode string, transactionId string, amount int, rem
 
 func (m *Mpesa) B2pochi(phonenumber string, amount int, remarks string) (map[string]interface{}, error) {
 	url := m.baseURL + "/mpesa/b2pochi/v1/paymentrequest"
+	cred, err := m.securityCredential()
+	if err != nil {
+		return nil, err
+	}
 	body := map[string]interface{}{
 		"OriginatorConversationID": m.getFormattedTimestamp(),
 		"InitiatorName":            m.config.InitiatorName,
-		"SecurityCredential":       m.securityCredential(),
+		"SecurityCredential":       cred,
 		"CommandID":                "BusinessPayToPochi",
 		"Amount":                   amount,
 		"PartyA":                   m.config.B2cShortcode,

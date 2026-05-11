@@ -3,28 +3,35 @@ package mpesa
 import (
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
 
+type tokenEntry struct {
+	token  string
+	expiry time.Time
+}
+
 type Auth struct {
-	config      *Config
-	baseURL     *string
-	token       string
-	tokenExpiry time.Time
+	config     *Config
+	baseURL    *string
+	tokenCache map[string]tokenEntry
 }
 
 func NewAuth(config *Config, baseURL *string) *Auth {
 	return &Auth{
-		config:  config,
-		baseURL: baseURL,
+		config:     config,
+		baseURL:    baseURL,
+		tokenCache: make(map[string]tokenEntry),
 	}
 }
 
 func (a *Auth) GetAccessToken(shortCodeType string) (string, error) {
-	if a.token != "" && time.Now().Before(a.tokenExpiry) {
-		return a.token, nil
+	if entry, ok := a.tokenCache[shortCodeType]; ok {
+		if entry.token != "" && time.Now().Before(entry.expiry) {
+			return entry.token, nil
+		}
 	}
 	return a.generateAccessToken(shortCodeType)
 }
@@ -34,8 +41,10 @@ func (a *Auth) generateAccessToken(shortCodeType string) (string, error) {
 	consumerSecret := a.config.MpesaConsumerSecret
 
 	if shortCodeType == "B2C" || shortCodeType == "B2B" {
-		consumerKey = a.config.B2cConsumerKey
-		consumerSecret = a.config.B2cConsumerSecret
+		if a.config.B2cConsumerKey != "" && a.config.B2cConsumerSecret != "" {
+			consumerKey = a.config.B2cConsumerKey
+			consumerSecret = a.config.B2cConsumerSecret
+		}
 	}
 
 	auth := base64.StdEncoding.EncodeToString([]byte(consumerKey + ":" + consumerSecret))
@@ -51,17 +60,21 @@ func (a *Auth) generateAccessToken(shortCodeType string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	var result map[string]interface{}
 	json.Unmarshal(body, &result)
 
-	a.token = result["access_token"].(string)
+	token := result["access_token"].(string)
 	expiresIn := int(result["expires_in"].(float64))
-	a.tokenExpiry = time.Now().Add(time.Duration(expiresIn-60) * time.Second)
+	entry := tokenEntry{
+		token:  token,
+		expiry: time.Now().Add(time.Duration(expiresIn-60) * time.Second),
+	}
+	a.tokenCache[shortCodeType] = entry
 
-	return a.token, nil
+	return token, nil
 }
 
 func (a *Auth) ClearToken() {
-	a.token = ""
+	a.tokenCache = make(map[string]tokenEntry)
 }

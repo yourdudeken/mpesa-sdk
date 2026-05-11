@@ -41,7 +41,7 @@ new Mpesa({
   b2cConsumerKey: '...',
   b2cConsumerSecret: '...',
   callbacks: {
-    callbackUrl: 'https://example.com/callback',
+    callback_url: 'https://example.com/callback',
     // ... see callbacks docs
   },
 });

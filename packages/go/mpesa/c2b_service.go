@@ -12,7 +12,7 @@ func NewC2BService(httpClient *HTTPClient, auth *Auth, config *Config) *C2BServi
 		httpClient: httpClient,
 		auth:       auth,
 		helpers:    NewHelpers(config),
-		baseURL:    httpClient.GetBaseURL(),
+		baseURL:    config.GetBaseURL(),
 	}
 }
 

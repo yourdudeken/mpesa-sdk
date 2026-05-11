@@ -27,7 +27,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.8",
     install_requires=[
-        "cryptography>=41.0.0",
+        "cryptography>=43.0.1",
         "requests>=2.28.0",
     ],
     keywords="mpesa daraja safaricom payments",

@@ -12,7 +12,7 @@ func NewB2PochiService(httpClient *HTTPClient, auth *Auth, config *Config) *B2Po
 		httpClient: httpClient,
 		auth:       auth,
 		helpers:    NewHelpers(config),
-		baseURL:    httpClient.GetBaseURL(),
+		baseURL:    config.GetBaseURL(),
 	}
 }
 
