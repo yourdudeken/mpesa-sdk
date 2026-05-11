@@ -14,7 +14,20 @@ func env(key, fallback string) string {
 	return fallback
 }
 
+func requireEnv(key string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	fmt.Fprintf(os.Stderr, "ERROR: %s is required but not set\n", key)
+	os.Exit(1)
+	return ""
+}
+
 func main() {
+	requireEnv("MPESA_CONSUMER_KEY")
+	requireEnv("MPESA_CONSUMER_SECRET")
+	requireEnv("MPESA_PASSKEY")
+	requireEnv("MPESA_INITIATOR_PASSWORD")
 	config := &mpesa.Config{
 		Environment:         env("MPESA_ENV", "sandbox"),
 		MpesaConsumerKey:    os.Getenv("MPESA_CONSUMER_KEY"),

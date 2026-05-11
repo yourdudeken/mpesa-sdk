@@ -14,7 +14,7 @@ func NewSTKPushService(httpClient *HTTPClient, auth *Auth, config *Config) *STKP
 		httpClient: httpClient,
 		auth:       auth,
 		helpers:    NewHelpers(config),
-		baseURL:    httpClient.GetBaseURL(),
+		baseURL:    config.GetBaseURL(),
 	}
 }
 

@@ -12,7 +12,7 @@ func NewB2BService(httpClient *HTTPClient, auth *Auth, config *Config) *B2BServi
 		httpClient: httpClient,
 		auth:       auth,
 		helpers:    NewHelpers(config),
-		baseURL:    httpClient.GetBaseURL(),
+		baseURL:    config.GetBaseURL(),
 	}
 }
 

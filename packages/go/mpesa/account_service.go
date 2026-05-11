@@ -12,7 +12,7 @@ func NewAccountService(httpClient *HTTPClient, auth *Auth, config *Config) *Acco
 		httpClient: httpClient,
 		auth:       auth,
 		helpers:    NewHelpers(config),
-		baseURL:    httpClient.GetBaseURL(),
+		baseURL:    config.GetBaseURL(),
 	}
 }
 
