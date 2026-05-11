@@ -212,6 +212,13 @@ func TestAuthToken(t *testing.T) {
 func TestStkPush(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":        "0",
 			"ResponseDescription": "Success",
@@ -280,6 +287,13 @@ func TestStkPushThrowsErrorWhenTillNumberRequired(t *testing.T) {
 func TestB2C(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":             "0",
 			"ResponseDescription":      "Success",
@@ -318,6 +332,13 @@ func TestB2C(t *testing.T) {
 func TestB2B(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":   "0",
 			"ConversationID": "AG_20231217_201020363925",
@@ -373,6 +394,13 @@ func TestB2BThrowsErrorWhenAccountNumberMissing(t *testing.T) {
 func TestC2bregisterURLS(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":        "0",
 			"ResponseDescription": "success",
@@ -408,6 +436,13 @@ func TestC2bregisterURLS(t *testing.T) {
 func TestC2bsimulate(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":        "0",
 			"ResponseDescription": "Success",
@@ -439,6 +474,13 @@ func TestC2bsimulate(t *testing.T) {
 func TestAccountBalance(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":        "0",
 			"ResponseDescription": "Success",
@@ -474,6 +516,13 @@ func TestAccountBalance(t *testing.T) {
 func TestTransactionStatus(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":        "0",
 			"ResponseDescription": "Success",
@@ -509,6 +558,13 @@ func TestTransactionStatus(t *testing.T) {
 func TestReversal(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":        "0",
 			"ResponseDescription": "Success",
@@ -544,6 +600,13 @@ func TestReversal(t *testing.T) {
 func TestB2Pochi(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == "GET" {
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"access_token": "test_token_123",
+				"expires_in":   3599,
+			})
+			return
+		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ResponseCode":   "0",
 			"ConversationID": "AG_20231217_201020363925",
