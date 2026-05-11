@@ -238,7 +238,7 @@ class TestC2B:
         mock_get.return_value = mock_token_response
 
         mpesa = Mpesa(config)
-        response = mpesa.c2bregisterURLS('600000')
+        response = mpesa.c2b_register_urls('600000')
         assert response['ResponseCode'] == '0'
 
     @patch('mpesa.client.requests.post')

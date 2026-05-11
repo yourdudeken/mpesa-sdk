@@ -18,7 +18,7 @@ func NewHTTPClient(baseURL string) *HTTPClient {
 func (c *HTTPClient) Post(url string, body map[string]interface{}, token string) (map[string]interface{}, error) {
 	jsonBody, _ := json.Marshal(body)
 
-	req, _ := http.NewRequest("POST", c.baseURL+url, bytes.NewBuffer(jsonBody))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -37,7 +37,7 @@ func (c *HTTPClient) Post(url string, body map[string]interface{}, token string)
 }
 
 func (c *HTTPClient) Get(url string, token string) (map[string]interface{}, error) {
-	req, _ := http.NewRequest("GET", c.baseURL+url, nil)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	client := &http.Client{}

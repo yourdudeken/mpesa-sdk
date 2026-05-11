@@ -10,15 +10,15 @@ import (
 
 type Auth struct {
 	config      *Config
-	baseURL     string
+	baseURL     *string
 	token       string
 	tokenExpiry time.Time
 }
 
-func NewAuth(config *Config) *Auth {
+func NewAuth(config *Config, baseURL *string) *Auth {
 	return &Auth{
 		config:  config,
-		baseURL: config.GetBaseURL(),
+		baseURL: baseURL,
 	}
 }
 
@@ -40,7 +40,7 @@ func (a *Auth) generateAccessToken(shortCodeType string) (string, error) {
 
 	auth := base64.StdEncoding.EncodeToString([]byte(consumerKey + ":" + consumerSecret))
 
-	url := a.baseURL + "/oauth/v1/generate?grant_type=client_credentials"
+	url := *a.baseURL + "/oauth/v1/generate?grant_type=client_credentials"
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Basic "+auth)
 

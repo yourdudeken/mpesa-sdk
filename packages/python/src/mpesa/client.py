@@ -219,7 +219,7 @@ class Mpesa:
         
         return self._mpesa_request(url, body, short_code_type)
     
-    def c2bregisterURLS(self, shortcode: str, confirm_url: Optional[str] = None, 
+    def c2b_register_urls(self, shortcode: str, confirm_url: Optional[str] = None, 
                        validate_url: Optional[str] = None, short_code_type: str = 'C2B') -> Dict[str, Any]:
         url = f'{self.base_url}/mpesa/c2b/v2/registerurl'
         

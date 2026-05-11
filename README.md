@@ -39,22 +39,90 @@ go get github.com/yourdudeken/mpesa-sdk
 
 ## API Reference
 
-All SDKs expose a consistent interface:
+All SDKs expose a consistent interface across all three languages.
+
+### Node.js
 
 ```typescript
-// Node.js
+import { Mpesa } from '@yourdudeken/mpesa-sdk';
+
+const mpesa = new Mpesa({
+  environment: 'sandbox',
+  mpesaConsumerKey: '...',
+  mpesaConsumerSecret: '...',
+  passkey: '...',
+  shortcode: '174379',
+  initiatorName: 'testapi',
+  initiatorPassword: '...',
+});
+
 await mpesa.stkpush({ phonenumber, amount, accountNumber });
+await mpesa.stkquery(checkoutRequestID);
 await mpesa.b2c({ phonenumber, commandId, amount, remarks });
+await mpesa.validated_b2c({ phonenumber, commandId, amount, remarks, idNumber });
+await mpesa.b2b({ receiverShortcode, commandId, amount, remarks, accountNumber });
 await mpesa.c2bregisterURLS({ shortcode, confirmUrl, validateUrl });
+await mpesa.c2bsimulate({ phonenumber, amount, shortcode, commandId });
+await mpesa.accountBalance({ shortcode, identifierType, remarks });
 await mpesa.transactionStatus({ shortcode, transactionId, identifierType, remarks });
+await mpesa.reversal({ shortcode, transactionId, amount, remarks });
+await mpesa.b2pochi({ phonenumber, amount, remarks });
 ```
 
+### Python
+
 ```python
-# Python
+from mpesa import Mpesa, MpesaConfig
+
+mpesa = Mpesa(MpesaConfig(
+    environment='sandbox',
+    mpesa_consumer_key='...',
+    mpesa_consumer_secret='...',
+    passkey='...',
+    shortcode='174379',
+    initiator_name='testapi',
+    initiator_password='...',
+))
+
 mpesa.stkpush(phonenumber, amount, account_number)
+mpesa.stkquery(checkout_request_id)
 mpesa.b2c(phonenumber, command_id, amount, remarks)
-mpesa.c2bregisterURLS(shortcode, confirm_url, validate_url)
+mpesa.validated_b2c(phonenumber, command_id, amount, remarks, id_number)
+mpesa.b2b(receiver_shortcode, command_id, amount, remarks, account_number)
+mpesa.c2b_register_urls(shortcode, confirm_url, validate_url)
+mpesa.c2bsimulate(phonenumber, amount, shortcode, command_id)
+mpesa.account_balance(shortcode, identifier_type, remarks)
 mpesa.transaction_status(shortcode, transaction_id, identifier_type, remarks)
+mpesa.reversal(shortcode, transaction_id, amount, remarks)
+mpesa.b2pochi(phonenumber, amount, remarks)
+```
+
+### Go
+
+```go
+import "github.com/yourdudeken/mpesa-sdk/mpesa"
+
+client := mpesa.NewClient(&mpesa.Config{
+    Environment:         "sandbox",
+    MpesaConsumerKey:    "...",
+    MpesaConsumerSecret: "...",
+    Passkey:             "...",
+    Shortcode:           "174379",
+    InitiatorName:       "testapi",
+    InitiatorPassword:   "...",
+})
+
+client.Stkpush(phonenumber, amount, accountNumber, callbackURL)
+client.Stkquery(checkoutRequestID, callbackURL)
+client.B2c(phonenumber, commandId, amount, remarks)
+client.Validated_b2c(phonenumber, commandId, amount, remarks, idNumber)
+client.B2b(receiverShortcode, commandId, amount, remarks, accountNumber)
+client.C2bregisterURLS(shortcode, confirmUrl, validateUrl)
+client.C2bsimulate(phonenumber, amount, shortcode, commandId, accountNumber)
+client.AccountBalance(shortcode, identifierType, remarks)
+client.TransactionStatus(shortcode, transactionId, identifierType, remarks)
+client.Reversal(shortcode, transactionId, amount, remarks)
+client.B2pochi(phonenumber, amount, remarks)
 ```
 
 ## Supported APIs
