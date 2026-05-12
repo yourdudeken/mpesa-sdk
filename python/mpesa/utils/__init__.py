@@ -2,7 +2,6 @@ import base64
 import hashlib
 import hmac
 import random
-import time
 from datetime import datetime
 from typing import Any
 
@@ -17,7 +16,7 @@ def generate_password(shortcode: int | str, passkey: str, timestamp: str) -> str
 
 
 def generate_security_credential(password: str, cert_path: str) -> str:
-    from cryptography.hazmat.primitives import serialization, hashes
+    from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import padding
 
     with open(cert_path, "rb") as f:
@@ -45,7 +44,8 @@ def mask_sensitive_data(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def is_phone_number_valid(phone: int | str) -> bool:
-    return bool(__import__("re").match(r"^2547\d{8}$", str(phone)))
+    import re
+    return bool(re.match(r"^2547\d{8}$", str(phone)))
 
 
 def format_phone_number(phone: int | str) -> str:
@@ -61,3 +61,14 @@ def calculate_backoff(attempt: int, base_delay_ms: int = 1000, max_delay_ms: int
     exponential = base_delay_ms * (2**attempt)
     jitter = random.uniform(0, 100)
     return min(exponential + jitter, max_delay_ms) / 1000.0
+
+
+__all__ = [
+    "generate_timestamp",
+    "generate_password",
+    "generate_security_credential",
+    "mask_sensitive_data",
+    "is_phone_number_valid",
+    "format_phone_number",
+    "calculate_backoff",
+]

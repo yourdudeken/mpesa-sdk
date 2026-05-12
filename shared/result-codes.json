@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "description": "Standard M-Pesa result codes per API type",
+  "stk_push": {
+    "0": "The service request is processed successfully.",
+    "1032": "Request cancelled by user",
+    "1037": "DS timeout",
+    "2001": "The initiator information is invalid.",
+    "2028": "The request is not permitted according to product assignment."
+  },
+  "b2c": {
+    "0": "The service request is processed successfully.",
+    "1": "The balance is insufficient for the transaction.",
+    "2": "Declined due to limit rule (below minimum).",
+    "3": "Declined due to limit rule (above maximum).",
+    "4": "Declined due to limit rule (daily limit).",
+    "8": "Declined due to limit rule (balance limit).",
+    "11": "The DebitParty is in an invalid state.",
+    "21": "The initiator is not allowed to initiate this request.",
+    "2001": "The initiator information is invalid.",
+    "2006": "Declined due to account rule.",
+    "2028": "The request is not permitted according to product assignment.",
+    "2040": "Credit Party customer type can't be supported.",
+    "8006": "The security credential is locked.",
+    "SFC_IC0003": "The operator does not exist."
+  },
+  "reversal": {
+    "0": "The service request is processed successfully.",
+    "R000001": "The transaction has already been reversed.",
+    "R000002": "The OriginalTransactionID is invalid.",
+    "1": "The balance is insufficient.",
+    "11": "The DebitParty is in an invalid state.",
+    "21": "The initiator is not allowed to initiate this request.",
+    "2001": "The initiator information is invalid.",
+    "2006": "Declined due to account rule.",
+    "2028": "Not permitted according to product assignment.",
+    "8006": "The security credential is locked."
+  },
+  "transaction_status": {
+    "0": "Success",
+    "SFC_IC0003": "The operator does not exist."
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "description": "M-Pesa API endpoint definitions for all environments",
+  "environments": {
+    "sandbox": {
+      "base_url": "https://sandbox.safaricom.co.ke",
+      "endpoints": {
+        "auth": "/oauth/v1/generate",
+        "stk_push": "/mpesa/stkpush/v1/processrequest",
+        "stk_query": "/mpesa/stkpushquery/v1/query",
+        "c2b_register_url": "/mpesa/c2b/v2/registerurl",
+        "c2b_simulate": "/mpesa/c2b/v2/simulate",
+        "b2c": "/mpesa/b2c/v3/paymentrequest",
+        "b2b": "/mpesa/b2b/v1/paymentrequest",
+        "reversal": "/mpesa/reversal/v1/request",
+        "transaction_status": "/mpesa/transactionstatus/v1/query",
+        "account_balance": "/mpesa/accountbalance/v1/query",
+        "dynamic_qr": "/mpesa/qrcode/v1/generate"
+      }
+    },
+    "production": {
+      "base_url": "https://api.safaricom.co.ke",
+      "endpoints": {
+        "auth": "/oauth/v1/generate",
+        "stk_push": "/mpesa/stkpush/v1/processrequest",
+        "stk_query": "/mpesa/stkpushquery/v1/query",
+        "c2b_register_url": "/mpesa/c2b/v2/registerurl",
+        "c2b_simulate": "/mpesa/c2b/v2/simulate",
+        "b2c": "/mpesa/b2c/v3/paymentrequest",
+        "b2b": "/mpesa/b2b/v1/paymentrequest",
+        "reversal": "/mpesa/reversal/v1/request",
+        "transaction_status": "/mpesa/transactionstatus/v1/query",
+        "account_balance": "/mpesa/accountbalance/v1/query",
+        "dynamic_qr": "/mpesa/qrcode/v1/generate"
+      }
+    }
+  }
+}

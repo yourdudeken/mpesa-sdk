@@ -1,13 +1,8 @@
 import hashlib
 import hmac
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
-from mpesa.models import (
-    C2BValidationRequest,
-    C2BValidationResponse,
-    STKCallbackPayload,
-    MpesaResult,
-)
+from mpesa.models import STKCallbackPayload
 
 
 WebhookHandler = Callable[[str, Any], None]
@@ -69,3 +64,9 @@ class WebhookManager:
             secret.encode(), payload.encode(), hashlib.sha256
         ).hexdigest()
         return hmac.compare_digest(expected, signature)
+
+
+__all__ = [
+    "WebhookManager",
+    "WebhookHandler",
+]

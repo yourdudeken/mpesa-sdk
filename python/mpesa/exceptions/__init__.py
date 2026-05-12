@@ -95,3 +95,15 @@ class WebhookVerificationError(MpesaError):
         **kwargs: Any,
     ) -> None:
         super().__init__(message, **kwargs)
+
+
+__all__ = [
+    "MpesaError",
+    "AuthenticationError",
+    "ValidationError",
+    "TimeoutError",
+    "APIConnectionError",
+    "RateLimitError",
+    "MpesaAPIError",
+    "WebhookVerificationError",
+]

@@ -10,7 +10,6 @@ from mpesa.exceptions import (
     MpesaAPIError,
     RateLimitError,
     TimeoutError,
-    ValidationError,
 )
 from mpesa.models import (
     AccountBalanceRequest,
@@ -35,7 +34,7 @@ from mpesa.models import (
     TransactionStatusRequest,
     TransactionStatusResponse,
 )
-from mpesa.utils import generate_password, generate_timestamp, mask_sensitive_data
+from mpesa.utils import generate_password, generate_timestamp
 
 RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
 
@@ -126,16 +125,16 @@ class Mpesa:
                 if attempt < self._config.max_retries:
                     time.sleep(min(2**attempt * 1.0, 30.0))
                     continue
-                raise last_error  # noqa: TRY201
+                raise last_error
 
             except httpx.ConnectError as e:
                 last_error = APIConnectionError("Connection failed.", cause=e)
                 if attempt < self._config.max_retries:
                     time.sleep(min(2**attempt * 1.0, 30.0))
                     continue
-                raise last_error  # noqa: TRY201
+                raise last_error
 
-            except (AuthenticationError, RateLimitError) as e:
+            except (AuthenticationError, RateLimitError):
                 raise
 
             except httpx.HTTPStatusError as e:
@@ -153,32 +152,26 @@ class Mpesa:
         url = get_full_url(self._config.environment, ENDPOINTS[endpoint_key])
         return self._request("POST", url, data)
 
-    # ---- STK Push ----
     def stk_push(self, request: STKPushRequest | dict) -> STKPushResponse:
         if isinstance(request, dict):
             request = STKPushRequest(**request)
-
         if not request.Password and self._config.passkey:
             timestamp = request.Timestamp or generate_timestamp()
             request.Password = generate_password(request.BusinessShortCode, self._config.passkey, timestamp)
             request.Timestamp = timestamp
-
         result = self._post("STK_PUSH", request.model_dump())
         return STKPushResponse(**result)
 
     def stk_query(self, request: STKQueryRequest | dict) -> STKQueryResponse:
         if isinstance(request, dict):
             request = STKQueryRequest(**request)
-
         if not request.Password and self._config.passkey:
             timestamp = request.Timestamp or generate_timestamp()
             request.Password = generate_password(request.BusinessShortCode, self._config.passkey, timestamp)
             request.Timestamp = timestamp
-
         result = self._post("STK_QUERY", request.model_dump())
         return STKQueryResponse(**result)
 
-    # ---- C2B ----
     def c2b_register_url(self, request: C2BRegisterURLRequest | dict) -> C2BResponse:
         if isinstance(request, dict):
             request = C2BRegisterURLRequest(**request)
@@ -191,42 +184,36 @@ class Mpesa:
         result = self._post("C2B_SIMULATE", request.model_dump())
         return C2BResponse(**result)
 
-    # ---- B2C ----
     def b2c(self, request: B2CRequest | dict) -> B2CResponse:
         if isinstance(request, dict):
             request = B2CRequest(**request)
         result = self._post("B2C", request.model_dump())
         return B2CResponse(**result)
 
-    # ---- B2B ----
     def b2b(self, request: B2BRequest | dict) -> B2BResponse:
         if isinstance(request, dict):
             request = B2BRequest(**request)
         result = self._post("B2B", request.model_dump())
         return B2BResponse(**result)
 
-    # ---- Reversal ----
     def reversal(self, request: ReversalRequest | dict) -> ReversalResponse:
         if isinstance(request, dict):
             request = ReversalRequest(**request)
         result = self._post("REVERSAL", request.model_dump())
         return ReversalResponse(**result)
 
-    # ---- Transaction Status ----
     def transaction_status(self, request: TransactionStatusRequest | dict) -> TransactionStatusResponse:
         if isinstance(request, dict):
             request = TransactionStatusRequest(**request)
         result = self._post("TRANSACTION_STATUS", request.model_dump())
         return TransactionStatusResponse(**result)
 
-    # ---- Account Balance ----
     def account_balance(self, request: AccountBalanceRequest | dict) -> AccountBalanceResponse:
         if isinstance(request, dict):
             request = AccountBalanceRequest(**request)
         result = self._post("ACCOUNT_BALANCE", request.model_dump())
         return AccountBalanceResponse(**result)
 
-    # ---- Dynamic QR ----
     def dynamic_qr(self, request: DynamicQRRequest | dict) -> DynamicQRResponse:
         if isinstance(request, dict):
             request = DynamicQRRequest(**request)

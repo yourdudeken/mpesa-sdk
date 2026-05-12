@@ -35,6 +35,16 @@ from mpesa.exceptions import (
     WebhookVerificationError,
 )
 from mpesa.webhooks import WebhookManager
+from mpesa.services import (
+    STKPushService,
+    C2BService,
+    B2CService,
+    B2BService,
+    ReversalService,
+    TransactionStatusService,
+    AccountBalanceService,
+    DynamicQRService,
+)
 
 __all__ = [
     "Mpesa",
@@ -70,6 +80,14 @@ __all__ = [
     "MpesaAPIError",
     "WebhookVerificationError",
     "WebhookManager",
+    "STKPushService",
+    "C2BService",
+    "B2CService",
+    "B2BService",
+    "ReversalService",
+    "TransactionStatusService",
+    "AccountBalanceService",
+    "DynamicQRService",
 ]
 
 __version__ = "0.1.0"
