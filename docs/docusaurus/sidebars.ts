@@ -1,0 +1,71 @@
+import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
+
+const sidebars: SidebarsConfig = {
+  docsSidebar: [
+    "intro",
+    "installation",
+    {
+      type: "category",
+      label: "TypeScript SDK",
+      items: [
+        "typescript/index",
+        "typescript/quickstart",
+        "typescript/stk-push",
+        "typescript/c2b",
+        "typescript/b2c",
+        "typescript/b2b",
+        "typescript/reversal",
+        "typescript/account-balance",
+        "typescript/transaction-status",
+        "typescript/dynamic-qr",
+        "typescript/webhooks",
+        "typescript/errors",
+        "typescript/middleware",
+      ],
+    },
+    {
+      type: "category",
+      label: "Python SDK",
+      items: [
+        "python/index",
+        "python/quickstart",
+        "python/stk-push",
+        "python/c2b",
+        "python/b2c",
+        "python/b2b",
+        "python/reversal",
+        "python/account-balance",
+        "python/transaction-status",
+        "python/dynamic-qr",
+        "python/webhooks",
+        "python/errors",
+      ],
+    },
+    {
+      type: "category",
+      label: "Go SDK",
+      items: [
+        "go/index",
+        "go/quickstart",
+        "go/stk-push",
+        "go/c2b",
+        "go/b2c",
+        "go/b2b",
+        "go/reversal",
+        "go/account-balance",
+        "go/transaction-status",
+        "go/dynamic-qr",
+        "go/webhooks",
+        "go/errors",
+      ],
+    },
+    "authentication",
+    "webhooks",
+    "errors",
+    "security",
+    "production",
+    "faq",
+  ],
+};
+
+export default sidebars;

@@ -1,0 +1,104 @@
+{
+  "name": "mpesa-sdk",
+  "version": "0.1.0",
+  "description": "Production-grade TypeScript SDK for Safaricom M-Pesa Daraja API",
+  "keywords": [
+    "mpesa",
+    "safaricom",
+    "daraja",
+    "payment",
+    "mobile-money",
+    "stk-push",
+    "b2c",
+    "b2b",
+    "c2b"
+  ],
+  "homepage": "https://github.com/yourdudeken/mpesa-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourdudeken/mpesa-sdk.git"
+  },
+  "license": "MIT",
+  "author": "M-Pesa SDK Team",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./webhooks": {
+      "import": {
+        "types": "./dist/webhooks/index.d.ts",
+        "default": "./dist/webhooks/index.mjs"
+      },
+      "require": {
+        "types": "./dist/webhooks/index.d.cts",
+        "default": "./dist/webhooks/index.js"
+      }
+    },
+    "./errors": {
+      "import": {
+        "types": "./dist/errors/index.d.ts",
+        "default": "./dist/errors/index.mjs"
+      },
+      "require": {
+        "types": "./dist/errors/index.d.cts",
+        "default": "./dist/errors/index.js"
+      }
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/types/index.mjs"
+      },
+      "require": {
+        "types": "./dist/types/index.d.cts",
+        "default": "./dist/types/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tsc --noEmit && eslint src/",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "tslib": "^2.6.3"
+  },
+  "peerDependencies": {
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "axios": "^1.7.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0"
+  }
+}
