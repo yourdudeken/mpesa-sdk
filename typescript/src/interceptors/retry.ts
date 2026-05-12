@@ -2,6 +2,7 @@ import type { AxiosError, AxiosInstance } from "axios";
 import { RateLimitError, APIConnectionError, TimeoutError } from "../errors/index.js";
 import { calculateBackoff, delay } from "../utils/index.js";
 import type { RetryConfig } from "../types/index.js";
+import { AuthenticationError, MpesaAPIError } from "../errors/index.js";
 
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
@@ -104,13 +105,13 @@ export function mapAxiosError(error: AxiosError): Error {
   }
 
   if (status === 401) {
-    return new (require("../errors/index.js").AuthenticationError)(
+    return new AuthenticationError(
       "M-Pesa API authentication failed. Check your consumer key/secret.",
       { statusCode: status, requestId, rawResponse: data, cause: error },
     );
   }
 
-  return new (require("../errors/index.js").MpesaAPIError)(
+  return new MpesaAPIError(
     (data?.errorMessage as string) ?? error.message,
     {
       statusCode: status,

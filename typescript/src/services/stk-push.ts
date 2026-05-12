@@ -15,7 +15,6 @@ export class STKPushService {
   constructor(private readonly client: MpesaApiClient) {}
 
   async initiate(request: STKPushRequest): Promise<STKPushResponse> {
-    const env = this.client.getConfig().environment;
     const passkey = this.client.getConfig().passkey;
 
     if (!passkey) {

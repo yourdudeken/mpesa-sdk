@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { publicEncrypt } from "node:crypto";
 
 export function generateTimestamp(): string {
   const now = new Date();
@@ -24,7 +24,6 @@ export function generateSecurityCredential(
   password: string,
   certificate: string,
 ): string {
-  const { publicEncrypt } = require("node:crypto");
   const certBuffer = Buffer.from(certificate);
   const encrypted = publicEncrypt(certBuffer, Buffer.from(password));
   return encrypted.toString("base64");

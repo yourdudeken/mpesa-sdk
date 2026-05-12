@@ -1,4 +1,3 @@
-import type { Request, Response, NextFunction } from "express";
 import type { WebhookManager, WebhookEvent } from "../webhooks/index.js";
 
 export interface MpesaWebhookOptions {
@@ -11,7 +10,7 @@ export interface MpesaWebhookOptions {
 export function createExpressMiddleware(
   options: MpesaWebhookOptions,
 ) {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: any, res: any, next: any): Promise<void> => {
     if (options.path && req.path !== options.path) {
       return next();
     }

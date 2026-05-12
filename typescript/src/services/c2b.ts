@@ -26,7 +26,7 @@ export class C2BService {
   }
 
   static validateTransaction(
-    request: C2BValidationRequest,
+    _request: C2BValidationRequest,
     accept = true,
   ): C2BValidationResponse {
     if (accept) {

@@ -1,8 +1,6 @@
-export type {
-  MpesaEnvironment,
-} from "../environment.js";
+import type { MpesaEnvironment } from "../environment.js";
+export type { MpesaEnvironment };
 
-/** Client configuration options */
 export interface MpesaConfig {
   consumerKey: string;
   consumerSecret: string;

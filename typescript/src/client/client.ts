@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { getBaseUrl } from "../environment.js";
-import type { MpesaConfig, LoggingHook, RetryConfig, AccessTokenResponse, TokenCache } from "../types/index.js";
+import type { MpesaConfig, LoggingHook, AccessTokenResponse, TokenCache } from "../types/index.js";
 import { maskSensitiveData } from "../utils/index.js";
 import { setupRetryInterceptor, mapAxiosError } from "../interceptors/retry.js";
 import { AuthenticationError } from "../errors/index.js";

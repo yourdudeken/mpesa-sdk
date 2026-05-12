@@ -1,4 +1,3 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { WebhookManager, WebhookEvent } from "../webhooks/index.js";
 
 export interface FastifyMpesaWebhookOptions {
@@ -10,12 +9,12 @@ export interface FastifyMpesaWebhookOptions {
 
 export function createFastifyPlugin(
   options: FastifyMpesaWebhookOptions,
-): (fastify: FastifyInstance) => Promise<void> {
-  return async (fastify: FastifyInstance) => {
+): (fastify: any) => Promise<void> {
+  return async (fastify: any) => {
     const path = options.path ?? "/mpesa/webhook";
 
-    fastify.post(path, async (request: FastifyRequest, reply: FastifyReply) => {
-      const body = request.body as Record<string, unknown>;
+    fastify.post(path, async (request: any, reply: any) => {
+      const body = request.body;
 
       if (options.verifySignature && options.secret) {
         const signature = request.headers["x-mpesa-signature"] as string;
@@ -26,10 +25,10 @@ export function createFastifyPlugin(
 
       let event: WebhookEvent;
 
-      if ((body as any)?.Body?.stkCallback) {
-        event = { type: "stk:callback" as const, payload: body as any };
-      } else if ((body as any)?.Result?.ResultParameters?.ResultParameter) {
-        const resultParams = (body as any).Result.ResultParameters.ResultParameter;
+      if (body?.Body?.stkCallback) {
+        event = { type: "stk:callback", payload: body };
+      } else if (body?.Result?.ResultParameters?.ResultParameter) {
+        const resultParams = body.Result.ResultParameters.ResultParameter;
         const hasAccountBalance = resultParams.some(
           (p: { Key: string }) => p.Key === "AccountBalance",
         );
@@ -38,14 +37,14 @@ export function createFastifyPlugin(
         );
 
         if (hasAccountBalance) {
-          event = { type: "account:balance" as const, payload: body as any };
+          event = { type: "account:balance", payload: body };
         } else if (hasTransactionStatus) {
-          event = { type: "transaction:status" as const, payload: body as any };
+          event = { type: "transaction:status", payload: body };
         } else {
-          event = { type: "b2c:result" as const, payload: body as any };
+          event = { type: "b2c:result", payload: body };
         }
-      } else if ((body as any)?.TransactionType) {
-        event = { type: "c2b:validation" as const, payload: body as any };
+      } else if (body?.TransactionType) {
+        event = { type: "c2b:validation", payload: body };
       } else {
         return reply.status(400).send({ error: "Unknown webhook event type" });
       }

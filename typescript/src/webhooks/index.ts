@@ -1,4 +1,4 @@
-import { WebhookVerificationError } from "../errors/index.js";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type {
   STKCallbackPayload,
   STKCallbackResult,
@@ -28,11 +28,9 @@ export type WebhookHandler = (event: WebhookEvent) => unknown | Promise<unknown>
 
 export class WebhookManager {
   private handlers = new Map<string, WebhookHandler[]>();
-  private readonly passkey?: string;
 
-  constructor(options?: { passkey?: string }) {
-    this.passkey = options?.passkey;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(_options?: { passkey?: string }) { }
 
   on(event: WebhookEvent["type"], handler: WebhookHandler): void {
     const existing = this.handlers.get(event) ?? [];
@@ -93,7 +91,6 @@ export class WebhookManager {
   }
 
   verifySignature(payload: string, signature: string, secret: string): boolean {
-    const { createHmac, timingSafeEqual } = require("node:crypto");
     const expected = createHmac("sha256", secret)
       .update(payload)
       .digest("hex");
