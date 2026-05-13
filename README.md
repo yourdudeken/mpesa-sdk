@@ -135,7 +135,8 @@ mpesa-sdk/
 ├── go/               # Go SDK
 ├── examples/         # Usage examples per language
 ├── docs/             # Documentation (Docusaurus)
-├── scripts/          # Shared utilities
+├── scripts/          # Automation scripts
+├── shared/           # Shared utilities
 └── .github/          # CI/CD workflows
 ```
 
