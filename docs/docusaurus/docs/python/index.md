@@ -7,7 +7,7 @@ sidebar_position: 1
 ## Installation
 
 ```bash
-pip install mpesa-sdk
+pip install yourdudeken-mpesa-sdk
 ```
 
 Requires Python 3.11+.

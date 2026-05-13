@@ -28,15 +28,15 @@ sidebar_position: 1
 
 | Language | Package | Status |
 |----------|---------|--------|
-| TypeScript | `mpesa-sdk` | Beta |
-| Python | `mpesa-sdk` | Beta |
+| TypeScript | `@yourdudeken/mpesa-sdk` | Beta |
+| Python | `yourdudeken-mpesa-sdk` | Beta |
 | Go | `github.com/yourdudeken/mpesa-sdk` | Beta |
 
 ## Quick Comparison
 
 ### TypeScript
 ```typescript
-import { Mpesa } from 'mpesa-sdk';
+import { Mpesa } from '@yourdudeken/mpesa-sdk';
 
 const mpesa = new Mpesa({
   consumerKey: process.env.MPESA_CONSUMER_KEY,

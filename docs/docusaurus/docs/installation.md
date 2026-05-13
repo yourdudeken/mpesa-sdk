@@ -7,7 +7,7 @@ sidebar_position: 2
 ## TypeScript
 
 ```bash
-npm install mpesa-sdk
+npm install @yourdudeken/mpesa-sdk
 # or
 yarn add mpesa-sdk
 # or
@@ -23,7 +23,7 @@ npm install axios
 ## Python
 
 ```bash
-pip install mpesa-sdk
+pip install yourdudeken-mpesa-sdk
 ```
 
 Requires Python 3.11+.

@@ -45,8 +45,12 @@ jobs:
   release-go:
     name: Tag Go Module
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           git tag go/v${{ github.event.inputs.version }}
           git push origin go/v${{ github.event.inputs.version }}
