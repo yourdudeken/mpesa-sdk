@@ -10,11 +10,11 @@ Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 
 ## Available SDKs
 
-| Language | Package | Status |
-|----------|---------|--------|
-| **TypeScript** | `@yourdudeken/mpesa-sdk` |  Beta |
-| **Python** | `yourdudeken-mpesa-sdk` |  Beta |
-| **Go** | `github.com/yourdudeken/mpesa-sdk` | Beta |
+| Language | Package | Version |
+|----------|---------|---------|
+| **TypeScript** | `@yourdudeken/mpesa-sdk` | 0.1.0 |
+| **Python** | `yourdudeken-mpesa-sdk` | 0.1.0 |
+| **Go** | `github.com/yourdudeken/mpesa-sdk` | 0.1.0 |
 
 ## Features
 
