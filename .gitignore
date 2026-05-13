@@ -1,6 +1,7 @@
 node_modules/
 dist/
 build/
+.docusaurus/
 .rs
 __pycache__/
 *.pyc
