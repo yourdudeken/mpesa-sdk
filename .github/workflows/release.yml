@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release version bump
+        description: "New version to release (semver, e.g. 0.2.1)"
         required: true
-        default: patch
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
+
+env:
+  NEW_VERSION: ${{ inputs.version }}
 
 jobs:
   release-ts:
     name: Publish TypeScript SDK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,8 +24,8 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
       - run: npm ci
+      - run: npm -w typescript version ${{ inputs.version }} --no-git-tag-version
       - run: npm run build:ts
-      - run: npm -w typescript version ${{ inputs.version }}
       - run: npm -w typescript publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -33,12 +33,15 @@ jobs:
   release-python:
     name: Publish Python SDK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install hatch
+      - run: cd python && hatch version ${{ inputs.version }}
       - run: cd python && hatch build
       - run: cd python && hatch publish -u __token__ -a ${{ secrets.PYPI_TOKEN }}
 
@@ -52,5 +55,5 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          git tag go/v${{ github.event.inputs.version }}
-          git push origin go/v${{ github.event.inputs.version }}
+          git tag go/v${{ inputs.version }}
+          git push origin go/v${{ inputs.version }}
