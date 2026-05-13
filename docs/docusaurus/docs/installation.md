@@ -8,10 +8,6 @@ sidebar_position: 2
 
 ```bash
 npm install @yourdudeken/mpesa-sdk
-# or
-yarn add mpesa-sdk
-# or
-pnpm add mpesa-sdk
 ```
 
 **Peer dependency:** Requires `axios` (v1.7+).
