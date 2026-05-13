@@ -35,7 +35,9 @@ fastapi = ["fastapi>=0.100.0"]
 django = ["django>=4.2.0"]
 flask = ["flask>=2.3.0"]
 all = [
-  "yourdudeken-mpesa-sdk[fastapi,django,flask]",
+  "fastapi>=0.100.0",
+  "django>=4.2.0",
+  "flask>=2.3.0",
 ]
 
 [project.urls]
