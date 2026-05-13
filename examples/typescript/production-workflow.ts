@@ -1,11 +1,4 @@
-import { Mpesa } from "mpesa-sdk";
-
-const RAW_SHORTCODE = process.env.MPESA_SHORTCODE;
-if (!RAW_SHORTCODE) throw new Error("MPESA_SHORTCODE is required");
-const SHORTCODE = parseInt(RAW_SHORTCODE, 10);
-if (isNaN(SHORTCODE) || SHORTCODE <= 0) {
-  throw new Error(`Invalid MPESA_SHORTCODE: ${RAW_SHORTCODE}`);
-}
+import { Mpesa } from "@yourdudeken/mpesa-sdk";
 
 const mpesa = new Mpesa({
   consumerKey: process.env.MPESA_CONSUMER_KEY!,
@@ -25,12 +18,17 @@ const mpesa = new Mpesa({
 });
 
 export async function productionWorkflow() {
+  const raw = process.env.MPESA_SHORTCODE;
+  if (!raw) throw new Error("MPESA_SHORTCODE is required");
+  const shortcode = parseInt(raw, 10);
+  if (isNaN(shortcode) || shortcode <= 0) throw new Error(`Invalid MPESA_SHORTCODE: ${raw}`);
+
   const stkResponse = await mpesa.stkPush.initiate({
-    BusinessShortCode: SHORTCODE,
+    BusinessShortCode: shortcode,
     TransactionType: "CustomerPayBillOnline",
     Amount: 5000,
     PartyA: 254722000000,
-    PartyB: SHORTCODE,
+    PartyB: shortcode,
     PhoneNumber: 254722000000,
     CallBackURL: "https://api.yourdomain.com/mpesa/callback",
     AccountReference: "ORDER-12345",
@@ -42,7 +40,7 @@ export async function productionWorkflow() {
 
   await new Promise((r) => setTimeout(r, 5000));
   const status = await mpesa.stkPush.query({
-    BusinessShortCode: String(SHORTCODE),
+    BusinessShortCode: String(shortcode),
     CheckoutRequestID: stkResponse.CheckoutRequestID,
     Password: "",
     Timestamp: "",
@@ -53,7 +51,7 @@ export async function productionWorkflow() {
     Initiator: process.env.MPESA_INITIATOR_NAME!,
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "AccountBalance",
-    PartyA: SHORTCODE,
+    PartyA: shortcode,
     IdentifierType: 4,
     Remarks: "Reconcile balance",
     QueueTimeOutURL: "https://api.yourdomain.com/mpesa/queue",

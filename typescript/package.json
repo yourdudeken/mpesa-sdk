@@ -1,5 +1,5 @@
 {
-  "name": "mpesa-sdk",
+  "name": "@yourdudeken/mpesa-sdk",
   "version": "0.1.0",
   "description": "Production-grade TypeScript SDK for Safaricom M-Pesa Daraja API",
   "keywords": [

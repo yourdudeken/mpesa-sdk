@@ -1,5 +1,5 @@
 import express from "express";
-import { Mpesa, createExpressMiddleware, WebhookManager } from "mpesa-sdk";
+import { Mpesa, createExpressMiddleware, WebhookManager } from "@yourdudeken/mpesa-sdk";
 
 const app = express();
 app.use(express.json());

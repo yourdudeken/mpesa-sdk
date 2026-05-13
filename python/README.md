@@ -5,7 +5,7 @@ Production-grade Python SDK for Safaricom M-Pesa Daraja API.
 ## Installation
 
 ```bash
-pip install mpesa-sdk
+pip install yourdudeken-mpesa-sdk
 ```
 
 Requires Python 3.11+.

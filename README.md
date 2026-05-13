@@ -3,8 +3,8 @@
 Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 
 [![CI](https://github.com/yourdudeken/mpesa-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/yourdudeken/mpesa-sdk/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/mpesa-sdk)](https://www.npmjs.com/package/mpesa-sdk)
-[![PyPI version](https://img.shields.io/pypi/v/mpesa-sdk)](https://pypi.org/project/mpesa-sdk/)
+[![npm version](https://img.shields.io/npm/v/@yourdudeken/mpesa-sdk)](https://www.npmjs.com/package/@yourdudeken/mpesa-sdk)
+[![PyPI version](https://img.shields.io/pypi/v/yourdudeken-mpesa-sdk)](https://pypi.org/project/yourdudeken-mpesa-sdk/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/yourdudeken/mpesa-sdk.svg)](https://pkg.go.dev/github.com/yourdudeken/mpesa-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -12,8 +12,8 @@ Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 
 | Language | Package | Status |
 |----------|---------|--------|
-| **TypeScript** | `mpesa-sdk` |  Beta |
-| **Python** | `mpesa-sdk` |  Beta |
+| **TypeScript** | `@yourdudeken/mpesa-sdk` |  Beta |
+| **Python** | `yourdudeken-mpesa-sdk` |  Beta |
 | **Go** | `github.com/yourdudeken/mpesa-sdk` | Beta |
 
 ## Features
@@ -38,11 +38,11 @@ Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 ### TypeScript
 
 ```bash
-npm install mpesa-sdk axios
+npm install @yourdudeken/mpesa-sdk axios
 ```
 
 ```typescript
-import { Mpesa } from 'mpesa-sdk';
+import { Mpesa } from '@yourdudeken/mpesa-sdk';
 
 const mpesa = new Mpesa({
   consumerKey: process.env.MPESA_CONSUMER_KEY!,
@@ -67,7 +67,7 @@ const response = await mpesa.stkPush.initiate({
 ### Python
 
 ```bash
-pip install mpesa-sdk
+pip install yourdudeken-mpesa-sdk
 ```
 
 ```python

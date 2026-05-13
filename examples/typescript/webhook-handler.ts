@@ -1,4 +1,4 @@
-import { Mpesa, WebhookManager } from "mpesa-sdk";
+import { Mpesa, WebhookManager } from "@yourdudeken/mpesa-sdk";
 
 const mpesa = new Mpesa({
   consumerKey: process.env.MPESA_CONSUMER_KEY!,
@@ -54,46 +54,36 @@ webhooks.on("c2b:validation", (event) => {
   return webhooks.createC2BValidationResponse(true);
 });
 
-function detectEvent(body: Record<string, any>):
-  | { type: "stk:callback"; payload: unknown }
-  | { type: "account:balance"; payload: unknown }
-  | { type: "transaction:status"; payload: unknown }
-  | { type: "b2b:result"; payload: unknown }
-  | { type: "reversal:result"; payload: unknown }
-  | { type: "b2c:result"; payload: unknown }
-  | { type: "c2b:validation"; payload: unknown }
-  | null {
-  if (body.Body?.stkCallback) {
-    return { type: "stk:callback", payload: body };
-  }
-
-  if (body.Result?.ResultParameters?.ResultParameter) {
-    const params: Array<{ Key: string }> = body.Result.ResultParameters.ResultParameter;
-    const keys = new Set(params.map((p: any) => p.Key));
-
-    if (keys.has("AccountBalance")) {
-      return { type: "account:balance", payload: body };
-    }
-    if (keys.has("TransactionStatus")) {
-      return { type: "transaction:status", payload: body };
-    }
-    if (keys.has("B2BRecipientPartyPublicName") || keys.has("B2BSenderPartyPublicName")) {
-      return { type: "b2b:result", payload: body };
-    }
-    if (keys.has("OriginalTransactionID")) {
-      return { type: "reversal:result", payload: body };
-    }
-    return { type: "b2c:result", payload: body };
-  }
-
-  if (body.TransactionType) {
-    return { type: "c2b:validation", payload: body };
-  }
-
-  return null;
+function isResultParamArray(val: unknown): val is Array<{ Key: string }> {
+  return Array.isArray(val) && val.every((p) => p && typeof p.Key === "string");
 }
 
 export async function handleWebhook(body: unknown) {
-  const event = detectEvent(body as Record<string, any>);
+  const data = body as Record<string, any>;
+  let event: any;
+
+  if (data.Body?.stkCallback) {
+    event = { type: "stk:callback" as const, payload: body };
+  } else if (data.Result?.ResultParameters?.ResultParameter) {
+    const params = data.Result.ResultParameters.ResultParameter;
+    if (!isResultParamArray(params)) return;
+
+    const keys = new Set(params.map((p: any) => p.Key));
+
+    if (keys.has("AccountBalance")) {
+      event = { type: "account:balance" as const, payload: body };
+    } else if (keys.has("TransactionStatus")) {
+      event = { type: "transaction:status" as const, payload: body };
+    } else if (keys.has("B2BRecipientPartyPublicName") || keys.has("B2BSenderPartyPublicName")) {
+      event = { type: "b2b:result" as const, payload: body };
+    } else if (keys.has("OriginalTransactionID")) {
+      event = { type: "reversal:result" as const, payload: body };
+    } else {
+      event = { type: "b2c:result" as const, payload: body };
+    }
+  } else if (data.TransactionType) {
+    event = { type: "c2b:validation" as const, payload: body };
+  }
+
   if (event) await webhooks.handleEvent(event);
 }

@@ -1,10 +1,13 @@
-import { Mpesa } from "mpesa-sdk";
+import { Mpesa } from "@yourdudeken/mpesa-sdk";
 
-const RAW_SHORTCODE = process.env.MPESA_SHORTCODE;
-if (!RAW_SHORTCODE) throw new Error("MPESA_SHORTCODE is required");
-const SHORTCODE = parseInt(RAW_SHORTCODE, 10);
-if (isNaN(SHORTCODE) || SHORTCODE <= 0) {
-  throw new Error(`Invalid MPESA_SHORTCODE: ${RAW_SHORTCODE}`);
+function resolveShortcode(): number {
+  const raw = process.env.MPESA_SHORTCODE;
+  if (!raw) throw new Error("MPESA_SHORTCODE is required");
+  const parsed = parseInt(raw, 10);
+  if (isNaN(parsed) || parsed <= 0) {
+    throw new Error(`Invalid MPESA_SHORTCODE: ${raw}`);
+  }
+  return parsed;
 }
 
 const mpesa = new Mpesa({
@@ -18,12 +21,13 @@ const mpesa = new Mpesa({
 });
 
 export async function stkPush() {
+  const shortcode = resolveShortcode();
   const response = await mpesa.stkPush.initiate({
-    BusinessShortCode: SHORTCODE,
+    BusinessShortCode: shortcode,
     TransactionType: "CustomerPayBillOnline",
     Amount: 1,
     PartyA: 254722000000,
-    PartyB: SHORTCODE,
+    PartyB: shortcode,
     PhoneNumber: 254722000000,
     CallBackURL: "https://your-domain.com/api/mpesa/callback",
     AccountReference: "INV-001",
@@ -36,7 +40,7 @@ export async function stkPush() {
 
 export async function stkQuery(checkoutRequestId: string) {
   const response = await mpesa.stkPush.query({
-    BusinessShortCode: process.env.MPESA_SHORTCODE!,
+    BusinessShortCode: String(resolveShortcode()),
     CheckoutRequestID: checkoutRequestId,
     Password: "",
     Timestamp: "",
@@ -46,7 +50,7 @@ export async function stkQuery(checkoutRequestId: string) {
 
 export async function c2bRegisterURL() {
   const response = await mpesa.c2b.registerURL({
-    ShortCode: process.env.MPESA_SHORTCODE!,
+    ShortCode: String(resolveShortcode()),
     ResponseType: "Completed",
     ConfirmationURL: "https://your-domain.com/api/c2b/confirmation",
     ValidationURL: "https://your-domain.com/api/c2b/validation",
@@ -56,7 +60,7 @@ export async function c2bRegisterURL() {
 
 export async function c2bSimulate() {
   const response = await mpesa.c2b.simulate({
-    ShortCode: SHORTCODE,
+    ShortCode: resolveShortcode(),
     CommandID: "CustomerPayBillOnline",
     Amount: 100,
     Msisdn: 254708374149,
@@ -71,7 +75,7 @@ export async function b2cPayment() {
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "BusinessPayment",
     Amount: 100,
-    PartyA: SHORTCODE,
+    PartyA: resolveShortcode(),
     PartyB: 254705912645,
     Remarks: "Salary disbursement",
     QueueTimeOutURL: "https://your-domain.com/api/b2c/queue",
@@ -104,7 +108,7 @@ export async function reverseTransaction(transactionId: string) {
     CommandID: "TransactionReversal",
     TransactionID: transactionId,
     Amount: 100,
-    ReceiverParty: SHORTCODE,
+    ReceiverParty: resolveShortcode(),
     QueueTimeOutURL: "https://your-domain.com/api/reversal/queue",
     ResultURL: "https://your-domain.com/api/reversal/result",
     Remarks: "Customer initiated reversal",
@@ -118,8 +122,10 @@ export async function checkTransactionStatus(transactionId: string) {
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "TransactionStatusQuery",
     TransactionID: transactionId,
-    PartyA: SHORTCODE,
+    PartyA: resolveShortcode(),
     IdentifierType: 4,
+    ResultURL: "https://your-domain.com/api/status/result",
+    QueueTimeOutURL: "https://your-domain.com/api/status/queue",
     Remarks: "Status check",
   });
   return response;
@@ -130,7 +136,7 @@ export async function checkAccountBalance() {
     Initiator: process.env.MPESA_INITIATOR_NAME!,
     SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL!,
     CommandID: "AccountBalance",
-    PartyA: SHORTCODE,
+    PartyA: resolveShortcode(),
     IdentifierType: 4,
     Remarks: "Daily balance check",
     QueueTimeOutURL: "https://your-domain.com/api/balance/queue",
@@ -145,7 +151,7 @@ export async function generateQR() {
     RefNo: "INV-2024-001",
     Amount: 1500,
     TrxCode: "BG",
-    CPI: String(SHORTCODE),
+    CPI: String(resolveShortcode()),
     Size: "300",
   });
   return response;

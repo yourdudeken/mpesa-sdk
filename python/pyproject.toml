@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mpesa-sdk"
+name = "yourdudeken-mpesa-sdk"
 version = "0.1.0"
 description = "Production-grade Python SDK for Safaricom M-Pesa Daraja API"
 readme = "README.md"
@@ -35,7 +35,7 @@ fastapi = ["fastapi>=0.100.0"]
 django = ["django>=4.2.0"]
 flask = ["flask>=2.3.0"]
 all = [
-  "mpesa-sdk[fastapi,django,flask]",
+  "yourdudeken-mpesa-sdk[fastapi,django,flask]",
 ]
 
 [project.urls]
