@@ -74,7 +74,7 @@ except MpesaError as e:
 ## Go
 
 ```go
-import "github.com/yourdudeken/mpesa-sdk/errors"
+import "github.com/yourdudeken/mpesa-sdk/go/errors"
 
 resp, err := mpesa.STKPush(ctx, req)
 if err != nil {

@@ -92,9 +92,9 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    "github.com/yourdudeken/mpesa-sdk/client"
-    "github.com/yourdudeken/mpesa-sdk/types"
-    "github.com/yourdudeken/mpesa-sdk/webhooks"
+    "github.com/yourdudeken/mpesa-sdk/go/client"
+    "github.com/yourdudeken/mpesa-sdk/go/types"
+    "github.com/yourdudeken/mpesa-sdk/go/webhooks"
 )
 
 func main() {

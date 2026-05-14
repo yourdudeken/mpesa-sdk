@@ -27,7 +27,7 @@ Requires Python 3.11+.
 ## Go
 
 ```bash
-go get github.com/yourdudeken/mpesa-sdk
+go get github.com/yourdudeken/mpesa-sdk/go
 ```
 
 Requires Go 1.22+.

@@ -30,7 +30,7 @@ sidebar_position: 1
 |----------|---------|--------|
 | TypeScript | `@yourdudeken/mpesa-sdk` | ![npm](https://img.shields.io/npm/v/@yourdudeken/mpesa-sdk) |
 | Python | `yourdudeken-mpesa-sdk` | ![pypi](https://img.shields.io/pypi/v/yourdudeken-mpesa-sdk) |
-| Go | `github.com/yourdudeken/mpesa-sdk` | ![go](https://img.shields.io/github/v/tag/yourdudeken/mpesa-sdk?filter=go/v*.*.*) |
+| Go | `github.com/yourdudeken/mpesa-sdk/go` | ![go](https://img.shields.io/github/v/tag/yourdudeken/mpesa-sdk?filter=go/v*.*.*) |
 
 ## Quick Comparison
 
@@ -85,8 +85,8 @@ response = client.stk_push({
 ### Go
 ```go
 import (
-    "github.com/yourdudeken/mpesa-sdk/client"
-    "github.com/yourdudeken/mpesa-sdk/types"
+    "github.com/yourdudeken/mpesa-sdk/go/client"
+    "github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 mpesa := client.NewClient(types.MpesaConfig{

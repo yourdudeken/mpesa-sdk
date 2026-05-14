@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Context manager support
   - FastAPI, Flask, Django integration examples
 
-- **Go SDK** (`github.com/yourdudeken/mpesa-sdk`)
+- **Go SDK** (`github.com/yourdudeken/mpesa-sdk/go`)
   - Context-aware HTTP client
   - Thread-safe token management
   - All M-Pesa API endpoints
