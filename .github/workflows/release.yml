@@ -1,62 +1,111 @@
-name: Release
+name: Auto-Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "New version to release (semver, e.g. 0.2.1)"
-        required: true
-        type: string
+  push:
+    branches: [main]
+    tags-ignore:
+      - "**"
 
-env:
-  NEW_VERSION: ${{ inputs.version }}
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-  release-ts:
-    name: Publish TypeScript SDK
+  release:
+    name: Tag & Publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
+    outputs:
+      version: ${{ steps.semver.outputs.next }}
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine next version
+        id: semver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --tags --force
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -1 | sed 's/^v//')
+          LATEST="${LATEST_TAG:-0.0.0}"
+          echo "current=$LATEST" >> $GITHUB_OUTPUT
+
+          if [ "$LATEST" = "0.0.0" ]; then
+            COMMITS=$(git log --format="%B%n---" HEAD | head -200)
+          else
+            COMMITS=$(git log --format="%B%n---" v$LATEST..HEAD 2>/dev/null || echo "")
+          fi
+
+          if echo "$COMMITS" | grep -qs "BREAKING CHANGE"; then
+            BUMP="major"
+          elif echo "$COMMITS" | grep -qs "!:"; then
+            BUMP="major"
+          elif echo "$COMMITS" | grep -qsE "^feat|^feat\("; then
+            BUMP="minor"
+          else
+            BUMP="patch"
+          fi
+
+          IFS='.' read -r MAJ MIN PAT <<< "$LATEST"
+          case "$BUMP" in
+            major) MAJ=$((MAJ+1)); MIN=0; PAT=0 ;;
+            minor) MIN=$((MIN+1)); PAT=0 ;;
+            patch) PAT=$((PAT+1)) ;;
+          esac
+          echo "next=$MAJ.$MIN.$PAT" >> $GITHUB_OUTPUT
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
+
+      - name: Print version info
+        run: |
+          echo "Current: v${{ steps.semver.outputs.current }}"
+          echo "Next:    v${{ steps.semver.outputs.next }}"
+          echo "Bump:    ${{ steps.semver.outputs.bump }}"
+
+      # ── Publish TypeScript ──
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
       - run: npm ci
-      - run: npm -w typescript version ${{ inputs.version }} --no-git-tag-version
-      - run: npm run build:ts
+      - run: npm -w typescript version ${{ steps.semver.outputs.next }} --no-git-tag-version
       - run: npm -w typescript publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  release-python:
-    name: Publish Python SDK
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
+      # ── Publish Python ──
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install hatch
       - run: |
           cd python
-          sed -i 's/^version = ".*"/version = "${{ inputs.version }}"/' pyproject.toml
-          sed -i 's/^__version__ = ".*"/__version__ = "${{ inputs.version }}"/' mpesa/__init__.py
-      - run: cd python && hatch build
-      - run: cd python && hatch publish -u __token__ -a ${{ secrets.PYPI_TOKEN }}
+          sed -i 's/^version = ".*"/version = "${{ steps.semver.outputs.next }}"/' pyproject.toml
+          sed -i 's/^__version__ = ".*"/__version__ = "${{ steps.semver.outputs.next }}"/' mpesa/__init__.py
+          hatch build
+        env:
+          HATCH_INDEX_USER: __token__
+          HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
+      - name: Publish Python to PyPI
+        run: cd python && hatch publish
+        env:
+          HATCH_INDEX_USER: __token__
+          HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
 
-  release-go:
-    name: Tag Go Module
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-          git tag go/v${{ inputs.version }}
-          git push origin go/v${{ inputs.version }}
+      # ── Create Git Tags ──
+      - name: Create and push tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag v${{ steps.semver.outputs.next }}
+          git tag go/v${{ steps.semver.outputs.next }}
+          git push origin v${{ steps.semver.outputs.next }}
+          git push origin go/v${{ steps.semver.outputs.next }}
