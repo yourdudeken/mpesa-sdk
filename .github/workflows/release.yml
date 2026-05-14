@@ -6,6 +6,10 @@ on:
     tags-ignore:
       - "**"
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   packages: write
@@ -27,15 +31,25 @@ jobs:
 
       - name: Determine next version
         id: semver
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git fetch --tags --force
-          LATEST=$(git tag -l 'v*' --sort=-v:refname | head -1 | sed 's/^v//' || echo "0.0.0")
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -1 | sed 's/^v//')
+          LATEST="${LATEST_TAG:-0.0.0}"
           echo "current=$LATEST" >> $GITHUB_OUTPUT
 
-          COMMITS=$(git log v$LATEST..HEAD --oneline 2>/dev/null || git log --oneline | head -20)
-          if echo "$COMMITS" | grep -q "BREAKING CHANGE\|!:"; then
+          if [ "$LATEST" = "0.0.0" ]; then
+            COMMITS=$(git log --format="%B%n---" HEAD | head -200)
+          else
+            COMMITS=$(git log --format="%B%n---" v$LATEST..HEAD 2>/dev/null || echo "")
+          fi
+
+          if echo "$COMMITS" | grep -qs "BREAKING CHANGE"; then
             BUMP="major"
-          elif echo "$COMMITS" | grep -qE "^feat|^feat\("; then
+          elif echo "$COMMITS" | grep -qs "!:"; then
+            BUMP="major"
+          elif echo "$COMMITS" | grep -qsE "^feat|^feat\("; then
             BUMP="minor"
           else
             BUMP="patch"
@@ -77,7 +91,14 @@ jobs:
           sed -i 's/^version = ".*"/version = "${{ steps.semver.outputs.next }}"/' pyproject.toml
           sed -i 's/^__version__ = ".*"/__version__ = "${{ steps.semver.outputs.next }}"/' mpesa/__init__.py
           hatch build
-          hatch publish -u __token__ -a ${{ secrets.PYPI_TOKEN }}
+        env:
+          HATCH_INDEX_USER: __token__
+          HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
+      - name: Publish Python to PyPI
+        run: cd python && hatch publish
+        env:
+          HATCH_INDEX_USER: __token__
+          HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
 
       # ── Create Git Tags ──
       - name: Create and push tags
