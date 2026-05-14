@@ -64,7 +64,7 @@ async def callback(request: Request):
 ## Go
 
 ```go
-import "github.com/yourdudeken/mpesa-sdk/webhooks"
+import "github.com/yourdudeken/mpesa-sdk/go/webhooks"
 
 wh := webhooks.NewManager()
 

@@ -3,6 +3,9 @@
 Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 
 [![CI](https://github.com/yourdudeken/mpesa-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/yourdudeken/mpesa-sdk/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@yourdudeken/mpesa-sdk)](https://www.npmjs.com/package/@yourdudeken/mpesa-sdk)
+[![PyPI version](https://img.shields.io/pypi/v/yourdudeken-mpesa-sdk)](https://pypi.org/project/yourdudeken-mpesa-sdk/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/yourdudeken/mpesa-sdk%2fgo.svg)](https://pkg.go.dev/github.com/yourdudeken/mpesa-sdk/go)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Available SDKs
@@ -11,7 +14,7 @@ Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 |----------|---------|---------|
 | **TypeScript** | `@yourdudeken/mpesa-sdk` | ![npm](https://img.shields.io/npm/v/@yourdudeken/mpesa-sdk) |
 | **Python** | `yourdudeken-mpesa-sdk` | ![pypi](https://img.shields.io/pypi/v/yourdudeken-mpesa-sdk) |
-| **Go** | `github.com/yourdudeken/mpesa-sdk` | ![go](https://img.shields.io/github/v/tag/yourdudeken/mpesa-sdk?filter=go/v*.*.*) |
+| **Go** | `github.com/yourdudeken/mpesa-sdk/go` | ![go](https://img.shields.io/github/v/tag/yourdudeken/mpesa-sdk?filter=go/v*.*.*) |
 
 ## Features
 
@@ -93,13 +96,13 @@ response = client.stk_push({
 ### Go
 
 ```bash
-go get github.com/yourdudeken/mpesa-sdk
+go get github.com/yourdudeken/mpesa-sdk/go
 ```
 
 ```go
 import (
-    "github.com/yourdudeken/mpesa-sdk/client"
-    "github.com/yourdudeken/mpesa-sdk/types"
+    "github.com/yourdudeken/mpesa-sdk/go/client"
+    "github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 mpesa := client.NewClient(types.MpesaConfig{

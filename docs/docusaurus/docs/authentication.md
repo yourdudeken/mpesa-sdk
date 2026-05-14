@@ -45,8 +45,8 @@ client = Mpesa({
 
 ```go
 import (
-    "github.com/yourdudeken/mpesa-sdk/client"
-    "github.com/yourdudeken/mpesa-sdk/types"
+    "github.com/yourdudeken/mpesa-sdk/go/client"
+    "github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 mpesa := client.NewClient(types.MpesaConfig{
