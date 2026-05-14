@@ -32,7 +32,7 @@ import {
   MpesaAPIError,
   WebhookVerificationError,
   isMpesaError,
-} from '@yourdudeken-mpesa-sdk/errors';
+} from '@yourdudeken/mpesa-sdk/errors';
 
 try {
   await mpesa.stkPush.initiate(request);
