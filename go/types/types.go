@@ -73,6 +73,7 @@ type MpesaConfig struct {
 	RetryConfig          RetryConfig
 	CircuitBreakerConfig CircuitBreakerConfig
 	RateLimiterConfig    RateLimiterConfig
+	IdempotencyEnabled   bool
 	Logger               Logger
 }
 

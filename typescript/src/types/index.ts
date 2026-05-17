@@ -15,6 +15,7 @@ export interface MpesaConfig {
   logger?: Logger;
   rateLimiterConfig?: import("../utils/rate-limiter.js").RateLimiterConfig;
   circuitBreakerConfig?: import("../utils/circuit-breaker.js").CircuitBreakerConfig;
+  enableIdempotency?: boolean;
 }
 
 export type ResolvedConfig = MpesaConfig & {

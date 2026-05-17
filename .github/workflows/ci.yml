@@ -45,6 +45,13 @@ jobs:
         run: |
           pip install pip-audit
           cd python && pip-audit || true
+      - name: Snyk Security Scan
+        uses: snyk/actions/node@v3
+        if: ${{ secrets.SNYK_TOKEN != '' }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --exclude=docs,tests,shared
 
   test-typescript:
     name: TypeScript Tests

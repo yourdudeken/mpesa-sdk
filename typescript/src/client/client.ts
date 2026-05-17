@@ -144,14 +144,24 @@ export class MpesaApiClient {
     return data.access_token;
   }
 
+  private generateIdempotencyKey(): string {
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+  }
+
   async request<T>(config: AxiosRequestConfig): Promise<T> {
     const token = await this.getAccessToken();
+    const headers: Record<string, string> = {
+      ...(config.headers as Record<string, string>),
+      Authorization: `Bearer ${token}`,
+    };
+
+    if (this.config.enableIdempotency && config.method?.toUpperCase() === "POST") {
+      headers["X-Idempotency-Key"] = this.generateIdempotencyKey();
+    }
+
     const mergedConfig: AxiosRequestConfig = {
       ...config,
-      headers: {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
     };
 
     const response = await this.client.request<T>(mergedConfig);
@@ -164,6 +174,13 @@ export class MpesaApiClient {
 
   async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
     return this.request<T>({ method: "GET", url, params });
+  }
+
+  rotateCredentials(consumerKey: string, consumerSecret: string): void {
+    this.config.consumerKey = consumerKey;
+    this.config.consumerSecret = consumerSecret;
+    this.invalidateToken();
+    this.logger.info("Credentials rotated");
   }
 
   invalidateToken(): void {

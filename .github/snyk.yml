@@ -1,0 +1,19 @@
+# Snyk Configuration for M-Pesa SDK
+# Run: snyk test --all-projects
+# Run: snyk monitor --all-projects
+exclude:
+  - "docs/**"
+  - "tests/**"
+  - "shared/**"
+  - "go/**/vendor/**"
+package-managers:
+  - npm
+  - pip
+  - golang
+monitor:
+  npm:
+    - typescript/
+  pip:
+    - python/
+  golang:
+    - go/

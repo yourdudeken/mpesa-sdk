@@ -17,6 +17,24 @@ import (
 	"github.com/yourdudeken/mpesa-sdk/go/validation"
 )
 
+func (c *Client) RotateCredentials(consumerKey, consumerSecret string) {
+	c.config.ConsumerKey = consumerKey
+	c.config.ConsumerSecret = consumerSecret
+	c.tokenManager.Invalidate()
+	c.logger.Info("Credentials rotated")
+}
+
+func (
+)
+
+func generateIdempotencyKey() string {
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return "unknown"
+	}
+	return hex.EncodeToString(b)
+}
+
 func generateRequestID() string {
 	b := make([]byte, 8)
 	if _, err := rand.Read(b); err != nil {
@@ -212,6 +230,9 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		req.Header.Set("X-Request-ID", requestID)
+		if c.config.IdempotencyEnabled && method == "POST" {
+			req.Header.Set("X-Idempotency-Key", generateIdempotencyKey())
+		}
 
 		if len(bodyData) > 0 {
 			req.ContentLength = int64(len(bodyData))

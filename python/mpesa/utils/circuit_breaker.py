@@ -43,6 +43,18 @@ class CircuitBreaker:
             self._on_failure()
             raise
 
+    async def acall(self, fn):
+        if self.state == CircuitState.OPEN:
+            raise CircuitBreakerOpenError("Circuit breaker is open")
+
+        try:
+            result = await fn()
+            self._on_success()
+            return result
+        except Exception as e:
+            self._on_failure()
+            raise
+
     def _on_success(self) -> None:
         if self._state == CircuitState.HALF_OPEN:
             self._success_count += 1

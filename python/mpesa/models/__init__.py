@@ -36,6 +36,7 @@ class MpesaConfig(BaseModel):
     retry_config: RetryConfig = RetryConfig()
     circuit_breaker_config: Optional[dict] = None
     rate_limiter_config: Optional[dict] = None
+    enable_idempotency: bool = True
     logger: Optional[Logger] = None
 
     def model_post_init(self, __context: Any) -> None:
