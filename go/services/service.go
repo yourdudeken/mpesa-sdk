@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/yourdudeken/mpesa-sdk/go/client"
 	svctypes "github.com/yourdudeken/mpesa-sdk/go/services/types"
@@ -41,9 +42,10 @@ func (s *Service) STKPush(ctx context.Context, input svctypes.STKPushInput) (*sv
 	}, nil
 }
 
-func (s *Service) STKQuery(ctx context.Context, input svctypes.STKPushInput) (*svctypes.STKQueryResult, error) {
+func (s *Service) STKQuery(ctx context.Context, input svctypes.STKQueryInput) (*svctypes.STKQueryResult, error) {
 	req := types.STKQueryRequest{
-		BusinessShortCode: string(rune(input.BusinessShortCode)),
+		BusinessShortCode: fmt.Sprintf("%d", input.BusinessShortCode),
+		CheckoutRequestID: input.CheckoutRequestID,
 	}
 	resp, err := s.client.STKQuery(ctx, req)
 	if err != nil {

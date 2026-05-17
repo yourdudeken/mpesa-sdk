@@ -1,6 +1,6 @@
 import { MpesaApiClient } from "../client/client.js";
 import { SANDBOX_ENDPOINTS } from "../environment.js";
-import { generatePassword, generateTimestamp } from "../utils/index.js";
+import { generatePassword, generateTimestamp, Validation } from "../utils/index.js";
 import { ValidationError } from "../errors/index.js";
 import type {
   STKPushRequest,
@@ -9,7 +9,13 @@ import type {
   STKQueryResponse,
   STKCallbackPayload,
   STKCallbackResult,
+  TransactionType,
 } from "../types/index.js";
+
+const VALID_TRANSACTION_TYPES: readonly TransactionType[] = [
+  "CustomerPayBillOnline",
+  "CustomerBuyGoodsOnline",
+] as const;
 
 export class STKPushService {
   constructor(private readonly client: MpesaApiClient) {}
@@ -20,6 +26,16 @@ export class STKPushService {
     if (!passkey) {
       throw new ValidationError("Passkey is required for STK Push.");
     }
+
+    Validation.positiveNumber(request.BusinessShortCode, "BusinessShortCode");
+    Validation.oneOf(request.TransactionType, "TransactionType", VALID_TRANSACTION_TYPES);
+    Validation.amount(request.Amount, "Amount");
+    Validation.phoneNumber(request.PartyA, "PartyA");
+    Validation.phoneNumber(request.PartyB, "PartyB");
+    Validation.phoneNumber(request.PhoneNumber, "PhoneNumber");
+    Validation.validUrl(request.CallBackURL, "CallBackURL");
+    Validation.maxLength(request.AccountReference, "AccountReference", 12);
+    Validation.maxLength(request.TransactionDesc, "TransactionDesc", 13);
 
     const timestamp = request.Timestamp || generateTimestamp();
     const password = request.Password || generatePassword(

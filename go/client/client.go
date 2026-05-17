@@ -27,14 +27,16 @@ type TokenManager struct {
 	consumerKey    string
 	consumerSecret string
 	httpClient     *http.Client
+	logger         types.Logger
 }
 
-func NewTokenManager(endpoint, consumerKey, consumerSecret string, httpClient *http.Client) *TokenManager {
+func NewTokenManager(endpoint, consumerKey, consumerSecret string, httpClient *http.Client, logger types.Logger) *TokenManager {
 	return &TokenManager{
 		endpoint:       endpoint,
 		consumerKey:    consumerKey,
 		consumerSecret: consumerSecret,
 		httpClient:     httpClient,
+		logger:         logger,
 	}
 }
 
@@ -59,6 +61,8 @@ func (tm *TokenManager) GetToken(ctx context.Context) (string, error) {
 	req.URL.RawQuery = q.Encode()
 	req.SetBasicAuth(tm.consumerKey, tm.consumerSecret)
 
+	tm.logger.Debug("Fetching new access token")
+
 	resp, err := tm.httpClient.Do(req)
 	if err != nil {
 		return "", errors.NewAPIConnectionError("Failed to get access token",
@@ -79,7 +83,15 @@ func (tm *TokenManager) GetToken(ctx context.Context) (string, error) {
 	tm.token = tokenResp.AccessToken
 	tm.expiresAt = time.Now().Add(time.Duration(tokenResp.ExpiresIn-60) * time.Second)
 
+	tm.logger.Debug("Access token acquired",
+		"expires_in", tokenResp.ExpiresIn,
+	)
+
 	return tm.token, nil
+}
+
+func (c *Client) Logger() types.Logger {
+	return c.logger
 }
 
 func (tm *TokenManager) Invalidate() {
@@ -94,6 +106,7 @@ type Client struct {
 	httpClient   *http.Client
 	tokenManager *TokenManager
 	endpoints    environmentEndpoints
+	logger       types.Logger
 }
 
 func NewClient(config types.MpesaConfig) *Client {
@@ -114,6 +127,17 @@ func NewClient(config types.MpesaConfig) *Client {
 
 	eps := getEndpoints(config.Environment)
 
+	logger := config.Logger
+	if logger == nil {
+		logger = types.NewNoopLogger()
+	}
+
+	logger.Debug("Creating M-Pesa client",
+		"environment", config.Environment,
+		"timeout", config.Timeout.String(),
+		"retry_max", config.RetryConfig.MaxRetries,
+	)
+
 	return &Client{
 		config:     config,
 		httpClient: httpClient,
@@ -122,30 +146,46 @@ func NewClient(config types.MpesaConfig) *Client {
 			config.ConsumerKey,
 			config.ConsumerSecret,
 			httpClient,
+			logger,
 		),
 		endpoints: eps,
+		logger:    logger,
 	}
 }
 
 func (c *Client) doRequest(ctx context.Context, method, url string, body interface{}) ([]byte, error) {
-	var reqBody io.Reader
-	if body != nil {
-		data, err := json.Marshal(body)
-		if err != nil {
-			return nil, errors.NewValidationError("Failed to marshal request body",
-				errors.WithCause(err))
-		}
-		reqBody = bytes.NewReader(data)
-	}
+	c.logger.Debug("Sending request",
+		"method", method,
+		"url", url,
+	)
 
 	var lastErr error
 	for attempt := 0; attempt <= c.config.RetryConfig.MaxRetries; attempt++ {
+		if attempt > 0 {
+			c.logger.Warn("Retrying request",
+				"method", method,
+				"url", url,
+				"attempt", attempt,
+				"max_retries", c.config.RetryConfig.MaxRetries,
+			)
+		}
 		token, err := c.tokenManager.GetToken(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
+		var reqBodyReader io.Reader
+		var bodyData []byte
+		if body != nil {
+			bodyData, err = json.Marshal(body)
+			if err != nil {
+				return nil, errors.NewValidationError("Failed to marshal request body",
+					errors.WithCause(err))
+			}
+			reqBodyReader = bytes.NewReader(bodyData)
+		}
+
+		req, err := http.NewRequestWithContext(ctx, method, url, reqBodyReader)
 		if err != nil {
 			return nil, err
 		}
@@ -153,10 +193,8 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 
-		if body != nil {
-			data, _ := json.Marshal(body)
-			req.Body = io.NopCloser(bytes.NewReader(data))
-			req.ContentLength = int64(len(data))
+		if len(bodyData) > 0 {
+			req.ContentLength = int64(len(bodyData))
 		}
 
 		resp, err := c.httpClient.Do(req)
@@ -164,20 +202,30 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 			lastErr = errors.NewAPIConnectionError("Request failed",
 				errors.WithCause(err))
 			if attempt < c.config.RetryConfig.MaxRetries {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				default:
+				}
 				delay := calculateBackoffDuration(attempt, c.config.RetryConfig)
 				time.Sleep(delay)
 				continue
 			}
 			return nil, lastErr
 		}
-		defer resp.Body.Close()
 
 		respBody, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
 		if err != nil {
 			return nil, err
 		}
 
 		if retryableStatusCodes[resp.StatusCode] && attempt < c.config.RetryConfig.MaxRetries {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+			}
 			var delay time.Duration
 			if resp.StatusCode == 429 {
 				retryAfter := resp.Header.Get("Retry-After")
@@ -189,18 +237,29 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 			} else {
 				delay = calculateBackoffDuration(attempt, c.config.RetryConfig)
 			}
+			c.logger.Warn("Retryable status code, backing off",
+				"status", resp.StatusCode,
+				"attempt", attempt,
+				"delay_ms", delay.Milliseconds(),
+			)
 			time.Sleep(delay)
 			continue
 		}
 
 		if resp.StatusCode == 401 {
 			c.tokenManager.Invalidate()
+			c.logger.Error("Authentication failed, token invalidated",
+				"status", resp.StatusCode,
+			)
 			return nil, errors.NewAuthenticationError("",
 				errors.WithStatusCode(resp.StatusCode),
 				errors.WithRawResponse(string(respBody)))
 		}
 
 		if resp.StatusCode == 429 {
+			c.logger.Error("Rate limit exceeded",
+				"status", resp.StatusCode,
+			)
 			return nil, errors.NewRateLimitError("", 60,
 				errors.WithStatusCode(resp.StatusCode),
 				errors.WithRawResponse(string(respBody)))
@@ -213,12 +272,22 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body interfa
 				ErrorMessage string `json:"errorMessage"`
 			}
 			json.Unmarshal(respBody, &errResp)
+			c.logger.Error("API error response",
+				"status", resp.StatusCode,
+				"error_code", errResp.ErrorCode,
+				"error_message", errResp.ErrorMessage,
+			)
 			return nil, errors.NewMpesaAPIError(errResp.ErrorMessage, errResp.ErrorCode,
 				errors.WithStatusCode(resp.StatusCode),
 				errors.WithRequestID(errResp.RequestID),
 				errors.WithRawResponse(string(respBody)))
 		}
 
+		c.logger.Debug("Request successful",
+			"method", method,
+			"url", url,
+			"status", resp.StatusCode,
+		)
 		return respBody, nil
 	}
 

@@ -12,12 +12,36 @@ export interface MpesaConfig {
   retryConfig?: RetryConfig;
   timeout?: number;
   logging?: LoggingHook;
+  logger?: Logger;
+  rateLimiterConfig?: import("../utils/rate-limiter.js").RateLimiterConfig;
+  circuitBreakerConfig?: import("../utils/circuit-breaker.js").CircuitBreakerConfig;
 }
+
+export type ResolvedConfig = MpesaConfig & {
+  environment: MpesaEnvironment;
+  initiatorPassword: string;
+  initiatorName: string;
+  passkey: string;
+  securityCredential: string;
+  retryConfig: RetryConfig;
+  timeout: number;
+  logging: LoggingHook;
+  logger: Logger;
+  rateLimiterConfig?: import("../utils/rate-limiter.js").RateLimiterConfig;
+  circuitBreakerConfig?: import("../utils/circuit-breaker.js").CircuitBreakerConfig;
+};
 
 export interface RetryConfig {
   maxRetries: number;
   baseDelayMs: number;
   maxDelayMs: number;
+}
+
+export interface Logger {
+  debug(msg: string, meta?: Record<string, unknown>): void;
+  info(msg: string, meta?: Record<string, unknown>): void;
+  warn(msg: string, meta?: Record<string, unknown>): void;
+  error(msg: string, meta?: Record<string, unknown>): void;
 }
 
 export interface LoggingHook {

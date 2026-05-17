@@ -1,4 +1,6 @@
 import { publicEncrypt } from "node:crypto";
+import type { Logger } from "../types/index.js";
+import { ValidationError } from "../errors/index.js";
 
 export function generateTimestamp(): string {
   const now = new Date();
@@ -83,4 +85,90 @@ export function calculateBackoff(
   const exponential = baseDelayMs * 2 ** attempt;
   const jitter = Math.random() * 100;
   return Math.min(exponential + jitter, maxDelayMs);
+}
+
+export const noopLogger: Logger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+};
+
+export function createConsoleLogger(name = "mpesa-sdk"): Logger {
+  return {
+    debug: (msg, meta) => console.debug(`[${name}] DEBUG: ${msg}`, meta ?? ""),
+    info: (msg, meta) => console.info(`[${name}] INFO: ${msg}`, meta ?? ""),
+    warn: (msg, meta) => console.warn(`[${name}] WARN: ${msg}`, meta ?? ""),
+    error: (msg, meta) => console.error(`[${name}] ERROR: ${msg}`, meta ?? ""),
+  };
+}
+
+export class Validation {
+  static requiredString(value: unknown, field: string): string {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new ValidationError(`${field} is required and must be a non-empty string`);
+    }
+    return value.trim();
+  }
+
+  static requiredNumber(value: unknown, field: string): number {
+    if (typeof value !== "number" || isNaN(value)) {
+      throw new ValidationError(`${field} is required and must be a valid number`);
+    }
+    return value;
+  }
+
+  static positiveNumber(value: unknown, field: string): number {
+    const num = Validation.requiredNumber(value, field);
+    if (num <= 0) {
+      throw new ValidationError(`${field} must be a positive number`);
+    }
+    return num;
+  }
+
+  static optionalString(value: unknown): string | undefined {
+    if (typeof value === "string" && value.trim().length > 0) return value.trim();
+    return undefined;
+  }
+
+  static validUrl(value: unknown, field: string): string {
+    const str = Validation.requiredString(value, field);
+    try {
+      new URL(str);
+    } catch {
+      throw new ValidationError(`${field} must be a valid URL`);
+    }
+    return str;
+  }
+
+  static phoneNumber(value: unknown, field: string): number {
+    const num = Validation.requiredNumber(value, field);
+    if (!/^2547\d{8}$/.test(String(num))) {
+      throw new ValidationError(`${field} must be a valid Safaricom phone number (2547XXXXXXXX)`);
+    }
+    return num;
+  }
+
+  static maxLength(value: unknown, field: string, max: number): string {
+    const str = Validation.requiredString(value, field);
+    if (str.length > max) {
+      throw new ValidationError(`${field} exceeds maximum length of ${max}`);
+    }
+    return str;
+  }
+
+  static oneOf<T extends string>(value: unknown, field: string, allowed: readonly T[]): T {
+    if (!allowed.includes(value as T)) {
+      throw new ValidationError(`${field} must be one of: ${allowed.join(", ")}`);
+    }
+    return value as T;
+  }
+
+  static amount(value: unknown, field: string, min = 1, max = 250000): number {
+    const num = Validation.positiveNumber(value, field);
+    if (num < min || num > max) {
+      throw new ValidationError(`${field} must be between ${min} and ${max}`);
+    }
+    return num;
+  }
 }

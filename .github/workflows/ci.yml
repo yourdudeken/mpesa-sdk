@@ -19,6 +19,25 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gitleaks - Secret Scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: npm audit
+        run: npm audit --audit-level=high || true
+      - name: Check for .env files
+        run: |
+          if find . -name ".env" -not -path "./.git/*" | grep -q .; then
+            echo "ERROR: .env files found in repository!"
+            exit 1
+          fi
+          echo "No .env files found - OK"
+
   test-typescript:
     name: TypeScript Tests
     runs-on: ubuntu-latest
@@ -30,6 +49,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:ts
+      - run: npm run build:ts
 
   test-python:
     name: Python Tests
@@ -56,11 +76,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
+      - run: cd go && go vet ./...
       - run: cd go && go test ./... -v -race -count=1
 
   release:
     name: Release
-    needs: [lint, test-typescript, test-python, test-go]
+    needs: [lint, security-scan, test-typescript, test-python, test-go]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

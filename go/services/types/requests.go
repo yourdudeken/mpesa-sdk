@@ -16,6 +16,11 @@ type STKPushInput struct {
 	TransactionDesc   string
 }
 
+type STKQueryInput struct {
+	BusinessShortCode int
+	CheckoutRequestID string
+}
+
 type C2BRegisterURLInput struct {
 	ShortCode       string
 	ResponseType    types.ResponseType

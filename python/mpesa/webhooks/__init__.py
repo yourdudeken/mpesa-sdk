@@ -1,21 +1,24 @@
 import hashlib
 import hmac
-from typing import Any, Callable
+import logging
+from typing import Any, Callable, Optional
 
-from mpesa.models import STKCallbackPayload
+from mpesa.models import STKCallbackPayload, Logger, _get_logger
 
 
 WebhookHandler = Callable[[str, Any], None]
 
 
 class WebhookManager:
-    def __init__(self) -> None:
+    def __init__(self, logger: Optional[Logger] = None) -> None:
         self._handlers: dict[str, list[WebhookHandler]] = {}
+        self._logger = _get_logger(logger)
 
     def on(self, event_type: str, handler: WebhookHandler) -> None:
         if event_type not in self._handlers:
             self._handlers[event_type] = []
         self._handlers[event_type].append(handler)
+        self._logger.debug("Webhook handler registered", extra={"event": event_type})
 
     def off(self, event_type: str, handler: WebhookHandler) -> None:
         if event_type in self._handlers:
@@ -23,12 +26,14 @@ class WebhookManager:
 
     def emit(self, event_type: str, payload: Any) -> None:
         handlers = self._handlers.get(event_type, [])
+        if not handlers:
+            self._logger.debug("No handlers registered for event", extra={"event": event_type})
+            return
         for handler in handlers:
             try:
                 handler(event_type, payload)
             except Exception as e:
-                import logging
-                logging.getLogger("mpesa").error(f"Webhook handler error: {e}")
+                self._logger.error("Webhook handler error", extra={"event": event_type, "error": str(e)})
 
     def parse_stk_callback(self, body: dict) -> dict:
         payload = STKCallbackPayload(**body)

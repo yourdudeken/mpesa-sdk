@@ -1,6 +1,52 @@
 package types
 
-import "time"
+import (
+	"log"
+	"time"
+)
+
+type Level string
+
+const (
+	LevelDebug Level = "DEBUG"
+	LevelInfo  Level = "INFO"
+	LevelWarn  Level = "WARN"
+	LevelError Level = "ERROR"
+)
+
+type Logger interface {
+	Debug(msg string, keysAndValues ...interface{})
+	Info(msg string, keysAndValues ...interface{})
+	Warn(msg string, keysAndValues ...interface{})
+	Error(msg string, keysAndValues ...interface{})
+}
+
+type noopLogger struct{}
+
+func (n *noopLogger) Debug(_ string, _ ...interface{}) {}
+func (n *noopLogger) Info(_ string, _ ...interface{})  {}
+func (n *noopLogger) Warn(_ string, _ ...interface{})  {}
+func (n *noopLogger) Error(_ string, _ ...interface{}) {}
+
+func NewNoopLogger() Logger { return &noopLogger{} }
+
+type stdLogger struct {
+	inner *log.Logger
+}
+
+func NewStdLogger(l *log.Logger) Logger { return &stdLogger{inner: l} }
+
+func (s *stdLogger) log(level Level, msg string, keysAndValues ...interface{}) {
+	args := make([]interface{}, 0, 2+len(keysAndValues))
+	args = append(args, "level", level, "msg", msg)
+	args = append(args, keysAndValues...)
+	s.inner.Println(args...)
+}
+
+func (s *stdLogger) Debug(msg string, kv ...interface{}) { s.log(LevelDebug, msg, kv...) }
+func (s *stdLogger) Info(msg string, kv ...interface{})  { s.log(LevelInfo, msg, kv...) }
+func (s *stdLogger) Warn(msg string, kv ...interface{})  { s.log(LevelWarn, msg, kv...) }
+func (s *stdLogger) Error(msg string, kv ...interface{}) { s.log(LevelError, msg, kv...) }
 
 type Environment string
 
@@ -25,6 +71,7 @@ type MpesaConfig struct {
 	SecurityCredential string
 	Timeout            time.Duration
 	RetryConfig        RetryConfig
+	Logger             Logger
 }
 
 // ---- Auth ----

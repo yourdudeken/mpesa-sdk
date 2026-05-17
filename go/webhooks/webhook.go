@@ -26,18 +26,29 @@ type WebhookHandler func(eventType EventType, payload interface{})
 type Manager struct {
 	mu       sync.RWMutex
 	handlers map[EventType][]WebhookHandler
+	logger   types.Logger
 }
 
-func NewManager() *Manager {
+func NewManager(logger ...types.Logger) *Manager {
+	l := types.NewNoopLogger()
+	if len(logger) > 0 && logger[0] != nil {
+		l = logger[0]
+	}
 	return &Manager{
 		handlers: make(map[EventType][]WebhookHandler),
+		logger:   l,
 	}
+}
+
+func (m *Manager) Logger() types.Logger {
+	return m.logger
 }
 
 func (m *Manager) On(event EventType, handler WebhookHandler) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.handlers[event] = append(m.handlers[event], handler)
+	m.logger.Debug("Webhook handler registered", "event", string(event))
 }
 
 func (m *Manager) Off(event EventType, handler WebhookHandler) {
@@ -58,11 +69,19 @@ func (m *Manager) Emit(event EventType, payload interface{}) {
 	handlers := m.handlers[event]
 	m.mu.RUnlock()
 
+	if len(handlers) == 0 {
+		m.logger.Debug("No handlers registered for event", "event", string(event))
+		return
+	}
+
 	for _, handler := range handlers {
 		func(h WebhookHandler) {
 			defer func() {
 				if r := recover(); r != nil {
-					fmt.Printf("[mpesa-sdk] Webhook handler panic: %v\n", r)
+					m.logger.Error("Webhook handler panic",
+						"event", string(event),
+						"panic", r,
+					)
 				}
 			}()
 			h(event, payload)
@@ -73,17 +92,21 @@ func (m *Manager) Emit(event EventType, payload interface{}) {
 func (m *Manager) HandleSTKCallback(body json.RawMessage) {
 	var payload types.STKCallbackPayload
 	if err := json.Unmarshal(body, &payload); err != nil {
-		fmt.Printf("[mpesa-sdk] Failed to parse STK callback: %v\n", err)
+		m.logger.Error("Failed to parse STK callback", "error", err.Error())
 		return
 	}
 	result := client.ParseSTKCallback(payload)
+	m.logger.Debug("Parsed STK callback",
+		"success", result.Success,
+		"result_code", result.ResultCode,
+	)
 	m.Emit(EventSTKCallback, result)
 }
 
 func (m *Manager) HandleResultCallback(body json.RawMessage) {
 	var result types.MpesaResult
 	if err := json.Unmarshal(body, &result); err != nil {
-		fmt.Printf("[mpesa-sdk] Failed to parse result callback: %v\n", err)
+		m.logger.Error("Failed to parse result callback", "error", err.Error())
 		return
 	}
 

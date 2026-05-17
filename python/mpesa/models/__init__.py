@@ -1,6 +1,20 @@
+import logging
 from datetime import datetime
-from typing import Any, Optional, Literal
+from typing import Any, Optional, Literal, Protocol
 from pydantic import BaseModel, Field
+
+
+class Logger(Protocol):
+    def debug(self, msg: str, *args: Any, **kwargs: Any) -> None: ...
+    def info(self, msg: str, *args: Any, **kwargs: Any) -> None: ...
+    def warning(self, msg: str, *args: Any, **kwargs: Any) -> None: ...
+    def error(self, msg: str, *args: Any, **kwargs: Any) -> None: ...
+
+
+def _get_logger(logger: Optional[Logger] = None) -> Logger:
+    if logger is not None:
+        return logger
+    return logging.getLogger("mpesa")
 
 
 class MpesaConfig(BaseModel):
@@ -13,6 +27,7 @@ class MpesaConfig(BaseModel):
     security_credential: Optional[str] = None
     timeout: int = 30
     max_retries: int = 3
+    logger: Optional[Logger] = None
 
 
 class AccessTokenResponse(BaseModel):

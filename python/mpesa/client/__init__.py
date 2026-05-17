@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import Any, Optional
 
@@ -33,10 +34,13 @@ from mpesa.models import (
     STKQueryResponse,
     TransactionStatusRequest,
     TransactionStatusResponse,
+    _get_logger,
 )
 from mpesa.utils import generate_password, generate_timestamp
 
 RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
+
+_LOGGER = logging.getLogger("mpesa")
 
 
 class _TokenManager:
@@ -45,10 +49,13 @@ class _TokenManager:
         self._config = config
         self._token: Optional[str] = None
         self._expires_at: float = 0.0
+        self._logger = _get_logger(config.logger)
 
     def get_token(self) -> str:
         if self._token and time.time() < self._expires_at:
             return self._token
+
+        self._logger.debug("Fetching new access token")
 
         url = get_full_url(self._config.environment, ENDPOINTS["AUTH"])
         response = self._client.get(
@@ -60,11 +67,14 @@ class _TokenManager:
         token_data = AccessTokenResponse(**data)
         self._token = token_data.access_token
         self._expires_at = time.time() + token_data.expires_in - 60
+
+        self._logger.debug("Access token acquired", extra={"expires_in": token_data.expires_in})
         return self._token
 
     def invalidate(self) -> None:
         self._token = None
         self._expires_at = 0.0
+        self._logger.warning("Access token invalidated")
 
 
 class Mpesa:
@@ -73,6 +83,7 @@ class Mpesa:
             config = MpesaConfig(**config)
 
         self._config = config
+        self._logger = _get_logger(config.logger)
         self._client = httpx.Client(
             base_url=get_full_url(config.environment, ""),
             timeout=config.timeout,
@@ -80,14 +91,35 @@ class Mpesa:
                 "Content-Type": "application/json",
                 "Accept": "application/json",
             },
+            event_hooks={
+                "request": [self._log_request],
+                "response": [self._log_response],
+            },
         )
         self._token_manager = _TokenManager(self._client, config)
+        self._logger.info("M-Pesa client initialized", extra={
+            "environment": config.environment,
+            "timeout": config.timeout,
+            "max_retries": config.max_retries,
+        })
+
+    def _log_request(self, request: httpx.Request) -> None:
+        self._logger.debug("Outgoing request",
+                           extra={"method": request.method, "url": str(request.url)})
+
+    def _log_response(self, response: httpx.Response) -> None:
+        self._logger.debug("Response received",
+                           extra={"status": response.status_code, "url": str(response.url)})
 
     def _request(self, method: str, url: str, json_data: Optional[dict] = None) -> dict:
         last_error: Optional[Exception] = None
 
         for attempt in range(self._config.max_retries + 1):
             try:
+                if attempt > 0:
+                    self._logger.warning("Retrying request",
+                                         extra={"attempt": attempt, "url": url})
+
                 token = self._token_manager.get_token()
                 response = self._client.request(
                     method=method,
@@ -97,7 +129,10 @@ class Mpesa:
                 )
 
                 if response.status_code in RETRYABLE_STATUS_CODES and attempt < self._config.max_retries:
-                    time.sleep(min(2**attempt * 1.0, 30.0))
+                    delay = min(2 ** attempt * 1.0, 30.0)
+                    self._logger.warning("Retryable status code, backing off",
+                                         extra={"status": response.status_code, "delay": delay, "attempt": attempt})
+                    time.sleep(delay)
                     continue
 
                 if response.status_code == 401:
@@ -118,19 +153,24 @@ class Mpesa:
                     )
 
                 response.raise_for_status()
-                return response.json()
+                json_result = response.json()
+                self._logger.debug("Request successful",
+                                   extra={"method": method, "url": url, "status": response.status_code})
+                return json_result
 
             except httpx.TimeoutException as e:
                 last_error = TimeoutError("Request timed out.", cause=e)
                 if attempt < self._config.max_retries:
-                    time.sleep(min(2**attempt * 1.0, 30.0))
+                    delay = min(2 ** attempt * 1.0, 30.0)
+                    time.sleep(delay)
                     continue
                 raise last_error
 
             except httpx.ConnectError as e:
                 last_error = APIConnectionError("Connection failed.", cause=e)
                 if attempt < self._config.max_retries:
-                    time.sleep(min(2**attempt * 1.0, 30.0))
+                    delay = min(2 ** attempt * 1.0, 30.0)
+                    time.sleep(delay)
                     continue
                 raise last_error
 
@@ -138,6 +178,8 @@ class Mpesa:
                 raise
 
             except httpx.HTTPStatusError as e:
+                self._logger.error("API error response",
+                                   extra={"status": e.response.status_code, "body": e.response.text})
                 raise MpesaAPIError(
                     str(e),
                     status_code=e.response.status_code,
