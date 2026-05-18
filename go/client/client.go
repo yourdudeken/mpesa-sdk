@@ -66,6 +66,12 @@ func NewTokenManager(endpoint, consumerKey, consumerSecret string, httpClient *h
 	}
 }
 
+func (tm *TokenManager) SetAuthEndpoint(endpoint string) {
+	tm.mu.Lock()
+	defer tm.mu.Unlock()
+	tm.endpoint = endpoint
+}
+
 func (tm *TokenManager) GetToken(ctx context.Context) (string, error) {
 	tm.mu.RLock()
 	if tm.token != "" && time.Now().Before(tm.expiresAt) {
@@ -394,8 +400,8 @@ func (c *Client) STKPush(ctx context.Context, req types.STKPushRequest) (*types.
 	if err := validation.MaxLength(req.TransactionDesc, "TransactionDesc", 13); err != nil {
 		return nil, err
 	}
-	if err := validation.OneOf(req.TransactionType, "TransactionType",
-		[]types.TransactionType{types.CustomerPayBillOnline, types.CustomerBuyGoodsOnline}); err != nil {
+	if err := validation.OneOf(string(req.TransactionType), "TransactionType",
+		[]string{string(types.CustomerPayBillOnline), string(types.CustomerBuyGoodsOnline)}); err != nil {
 		return nil, err
 	}
 

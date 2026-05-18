@@ -63,17 +63,13 @@ func MaxLength(value string, field string, max int) error {
 	return nil
 }
 
-func OneOf[T ~string](value T, field string, allowed []T) error {
+func OneOf(value string, field string, allowed []string) error {
 	for _, a := range allowed {
 		if value == a {
 			return nil
 		}
 	}
-	allowedStrs := make([]string, len(allowed))
-	for i, a := range allowed {
-		allowedStrs[i] = string(a)
-	}
-	return errors.NewValidationError(fmt.Sprintf("%s must be one of: %s", field, strings.Join(allowedStrs, ", ")))
+	return errors.NewValidationError(fmt.Sprintf("%s must be one of: %s", field, strings.Join(allowed, ", ")))
 }
 
 func Amount(value int, field string, min, max int) error {

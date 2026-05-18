@@ -2,8 +2,6 @@ package client
 
 import (
 	"context"
-
-	"github.com/yourdudeken/mpesa-sdk/go/types"
 )
 
 type BatchRequest struct {

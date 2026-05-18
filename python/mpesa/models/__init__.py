@@ -24,6 +24,8 @@ class RetryConfig(BaseModel):
 
 
 class MpesaConfig(BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
     consumer_key: str
     consumer_secret: str
     environment: Literal["sandbox", "production"] = "sandbox"

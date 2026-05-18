@@ -56,6 +56,7 @@ func TestSTKPushWithMockServer(t *testing.T) {
 	})
 
 	client.endpoints.Auth = authServer.URL + "/oauth/v1/generate"
+	client.tokenManager.SetAuthEndpoint(client.endpoints.Auth)
 	client.endpoints.STKPush = apiServer.URL + "/mpesa/stkpush/v1/processrequest"
 
 	req := types.STKPushRequest{
@@ -106,6 +107,7 @@ func TestC2BRegisterURLWithMockServer(t *testing.T) {
 	})
 
 	client.endpoints.Auth = authServer.URL + "/oauth/v1/generate"
+	client.tokenManager.SetAuthEndpoint(client.endpoints.Auth)
 	client.endpoints.C2BRegisterURL = apiServer.URL + "/mpesa/c2b/v1/registerurl"
 
 	req := types.C2BRegisterURLRequest{
@@ -151,6 +153,7 @@ func TestB2CWithMockServer(t *testing.T) {
 	})
 
 	client.endpoints.Auth = authServer.URL + "/oauth/v1/generate"
+	client.tokenManager.SetAuthEndpoint(client.endpoints.Auth)
 	client.endpoints.B2C = apiServer.URL + "/mpesa/b2c/v1/paymentrequest"
 
 	req := types.B2CRequest{
@@ -213,6 +216,7 @@ func TestRetryOnServerError(t *testing.T) {
 	})
 
 	client.endpoints.Auth = authServer.URL + "/oauth/v1/generate"
+	client.tokenManager.SetAuthEndpoint(client.endpoints.Auth)
 	client.endpoints.STKPush = apiServer.URL + "/mpesa/stkpush/v1/processrequest"
 
 	req := types.STKPushRequest{
@@ -265,6 +269,7 @@ func TestMaxRetriesExceeded(t *testing.T) {
 	})
 
 	client.endpoints.Auth = authServer.URL + "/oauth/v1/generate"
+	client.tokenManager.SetAuthEndpoint(client.endpoints.Auth)
 	client.endpoints.STKPush = apiServer.URL + "/mpesa/stkpush/v1/processrequest"
 
 	req := types.STKPushRequest{
@@ -322,6 +327,7 @@ func TestRequestIDHeaderSent(t *testing.T) {
 	})
 
 	client.endpoints.Auth = authServer.URL + "/oauth/v1/generate"
+	client.tokenManager.SetAuthEndpoint(client.endpoints.Auth)
 	client.endpoints.STKPush = apiServer.URL + "/mpesa/stkpush/v1/processrequest"
 
 	req := types.STKPushRequest{

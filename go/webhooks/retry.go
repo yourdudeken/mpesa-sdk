@@ -1,7 +1,6 @@
 package webhooks
 
 import (
-	"log"
 	"math"
 	"sync"
 	"time"
