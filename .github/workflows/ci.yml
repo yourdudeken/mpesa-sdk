@@ -42,7 +42,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.25'
       - name: Install dependencies
         run: |
           cd go
@@ -128,7 +128,7 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: '1.25'
       - run: npm ci
       - run: npm run build
       - name: Semantic Release
