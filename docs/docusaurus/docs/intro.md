@@ -8,6 +8,7 @@ sidebar_position: 1
 
 ## Features
 
+### Core API Operations
 - **OAuth Authentication** with automatic token management and refresh
 - **STK Push (M-Pesa Express)** with password generation
 - **STK Query** to check transaction status
@@ -19,8 +20,20 @@ sidebar_position: 1
 - **Account Balance Query** with structured balance parsing
 - **Dynamic QR Code** generation
 - **Webhook Handling** with event-driven architecture
+
+### Enterprise Resilience
+- **Circuit Breaker** - Automatic failure detection and graceful degradation to prevent cascading failures
+- **Rate Limiting** - Token bucket algorithm for controlling request rates and preventing overload
+- **Batch Requests** - Execute multiple operations concurrently with intelligent scheduling
+- **Webhook Retry with DLQ** - Dead-letter-queue pattern for failed webhooks with configurable retry policies
+
+### Observability & Monitoring
+- **OpenTelemetry Tracing** - Distributed tracing for debugging and performance analysis
+- **Prometheus Metrics** - Comprehensive metrics collection for system monitoring and alerting
+
+### Foundation
 - **Structured Errors** with typed error hierarchy
-- **Retry & Resilience** with exponential backoff
+- **Exponential Backoff** with jitter for intelligent retry logic
 - **Environment Switching** (sandbox/production)
 - **Security** with credential masking and input validation
 
@@ -108,6 +121,117 @@ resp, err := mpesa.STKPush(ctx, types.STKPushRequest{
     TransactionDesc:   "Payment",
 })
 ```
+
+## Enterprise Features
+
+### Circuit Breaker Protection
+
+The circuit breaker automatically detects and responds to failures, preventing cascading failures across your system:
+
+**TypeScript:**
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: process.env.MPESA_CONSUMER_KEY,
+  consumerSecret: process.env.MPESA_CONSUMER_SECRET,
+  environment: 'sandbox',
+  passkey: process.env.MPESA_PASSKEY,
+  resilience: {
+    circuitBreaker: {
+      failureThreshold: 5,      // Open after 5 failures
+      successThreshold: 2,      // Close after 2 successes
+      timeout: 60000,           // Retry after 60 seconds
+    },
+  },
+});
+```
+
+**Python:**
+```python
+client = Mpesa({
+    "consumer_key": "...",
+    "consumer_secret": "...",
+    "environment": "sandbox",
+    "passkey": "...",
+    "resilience": {
+        "circuit_breaker": {
+            "failure_threshold": 5,
+            "success_threshold": 2,
+            "timeout": 60000,
+        }
+    }
+})
+```
+
+**Go:**
+```go
+mpesa := client.NewClient(types.MpesaConfig{
+    ConsumerKey:    "...",
+    ConsumerSecret: "...",
+    Environment:    types.Sandbox,
+    Passkey:        "...",
+    Resilience: &types.ResilienceConfig{
+        CircuitBreaker: &types.CircuitBreakerConfig{
+            FailureThreshold: 5,
+            SuccessThreshold: 2,
+            Timeout:          60000,
+        },
+    },
+})
+```
+
+### Rate Limiting
+
+Control request rates using the token bucket algorithm:
+
+```typescript
+// TypeScript
+resilience: {
+  rateLimiter: {
+    capacity: 100,           // Burst capacity
+    refillRate: 10,          // Tokens per interval
+    refillInterval: 1000,    // Interval in ms
+  },
+}
+```
+
+```python
+# Python
+"resilience": {
+    "rate_limiter": {
+        "capacity": 100,
+        "refill_rate": 10,
+        "refill_interval": 1000,
+    }
+}
+```
+
+### Observability
+
+Enable distributed tracing and metrics collection:
+
+```typescript
+import { Resource } from '@opentelemetry/resources';
+import { BasicTracerProvider } from '@opentelemetry/sdk-trace-node';
+
+const resource = Resource.default().merge(
+  new Resource({ 'service.name': 'mpesa-service' })
+);
+
+const tracerProvider = new BasicTracerProvider({ resource });
+const mpesa = new Mpesa({
+  // ... config
+  tracer: tracerProvider.getTracer('mpesa-client'),
+  metricsCollector: myMetricsCollector,
+});
+```
+
+Learn more:
+- [Circuit Breaker Guide](./resilience/circuit-breaker)
+- [Rate Limiter Guide](./resilience/rate-limiter)
+- [Batch Requests Guide](./resilience/batch-requests)
+- [Webhook Retry & DLQ](./resilience/webhook-dlq)
+- [Tracing Guide](./observability/tracing)
+- [Metrics Guide](./observability/metrics)
 
 ## Architecture
 

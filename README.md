@@ -18,6 +18,7 @@ Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 
 ## Features
 
+### Core API Operations
 - **OAuth Authentication** with automatic token management
 - **STK Push (M-Pesa Express)** with password generation
 - **STK Query** - Check transaction status
@@ -29,8 +30,20 @@ Production-grade SDK ecosystem for Safaricom M-Pesa Daraja APIs.
 - **Account Balance Query** - Check balances
 - **Dynamic QR** - Generate QR codes
 - **Webhook Handling** - Event-driven callbacks
-- **Structured Errors** - Typed error hierarchy
-- **Retry & Resilience** - Exponential backoff
+
+### Enterprise Resilience
+- **Circuit Breaker** - Automatic failure detection and graceful degradation
+- **Rate Limiting** - Token bucket algorithm for request throttling
+- **Batch Requests** - Execute multiple operations concurrently with smart scheduling
+- **Webhook Retry with DLQ** - Dead-letter-queue for failed webhooks with configurable retry policies
+
+### Observability
+- **OpenTelemetry Tracing** - Distributed tracing for debugging and performance monitoring
+- **Prometheus Metrics** - Comprehensive metrics collection for system insights
+
+### Foundation
+- **Structured Errors** - Typed error hierarchy with detailed context
+- **Exponential Backoff** - Smart retry mechanism with jitter
 - **Framework Integrations** - Express, Fastify, FastAPI, Flask, Gin
 
 ## Quick Start
@@ -124,6 +137,132 @@ resp, err := mpesa.STKPush(ctx, types.STKPushRequest{
     TransactionDesc:   "Payment",
 })
 ```
+
+## Enterprise Features
+
+### Circuit Breaker Protection
+
+Automatically detect and respond to failures:
+
+**TypeScript:**
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: process.env.MPESA_CONSUMER_KEY!,
+  consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
+  environment: 'sandbox',
+  passkey: process.env.MPESA_PASSKEY!,
+  resilience: {
+    circuitBreaker: {
+      failureThreshold: 5,
+      successThreshold: 2,
+      timeout: 60000,
+    },
+  },
+});
+```
+
+**Python:**
+```python
+client = Mpesa({
+    "consumer_key": "...",
+    "consumer_secret": "...",
+    "environment": "sandbox",
+    "passkey": "...",
+    "resilience": {
+        "circuit_breaker": {
+            "failure_threshold": 5,
+            "success_threshold": 2,
+            "timeout": 60000,
+        }
+    }
+})
+```
+
+**Go:**
+```go
+mpesa := client.NewClient(types.MpesaConfig{
+    ConsumerKey:    os.Getenv("MPESA_CONSUMER_KEY"),
+    ConsumerSecret: os.Getenv("MPESA_CONSUMER_SECRET"),
+    Environment:    types.Sandbox,
+    Passkey:        os.Getenv("MPESA_PASSKEY"),
+    Resilience: &types.ResilienceConfig{
+        CircuitBreaker: &types.CircuitBreakerConfig{
+            FailureThreshold: 5,
+            SuccessThreshold: 2,
+            Timeout:          60000,
+        },
+    },
+})
+```
+
+### Rate Limiting
+
+Control request rates with token bucket algorithm:
+
+**TypeScript:**
+```typescript
+const mpesa = new Mpesa({
+  // ... config
+  resilience: {
+    rateLimiter: {
+      capacity: 100,
+      refillRate: 10,
+      refillInterval: 1000,
+    },
+  },
+});
+```
+
+**Python:**
+```python
+client = Mpesa({
+    # ... config
+    "resilience": {
+        "rate_limiter": {
+            "capacity": 100,
+            "refill_rate": 10,
+            "refill_interval": 1000,
+        }
+    }
+})
+```
+
+**Go:**
+```go
+mpesa := client.NewClient(types.MpesaConfig{
+    // ... config
+    Resilience: &types.ResilienceConfig{
+        RateLimiter: &types.RateLimiterConfig{
+            Capacity:      100,
+            RefillRate:    10,
+            RefillInterval: 1000,
+        },
+    },
+})
+```
+
+### Observability
+
+Enable tracing and metrics collection:
+
+**TypeScript:**
+```typescript
+import { Resource } from '@opentelemetry/resources';
+import { BasicTracerProvider } from '@opentelemetry/sdk-trace-node';
+
+const resource = Resource.default().merge(
+  new Resource({ 'service.name': 'mpesa-service' })
+);
+
+const tracerProvider = new BasicTracerProvider({ resource });
+const mpesa = new Mpesa({
+  // ... config
+  tracer: tracerProvider.getTracer('mpesa-client'),
+  metricsCollector: myMetricsCollector,
+});
+```
+
+See full documentation for detailed setup across all languages and features.
 
 ## Architecture
 

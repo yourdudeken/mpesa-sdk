@@ -4,9 +4,9 @@ sidebar_position: 10
 
 # Retry & Resilience
 
-The SDK implements automatic retry with exponential backoff for transient failures.
+The SDK implements comprehensive resilience patterns including automatic retry with exponential backoff, circuit breaker pattern, rate limiting, and batch request execution.
 
-## Retry Configuration
+## Basic Retry Configuration
 
 ### TypeScript
 
@@ -73,6 +73,72 @@ Delay = baseDelayMs * 2^attempt + random_jitter
 | 2 | ~4000ms |
 | 3 | ~8000ms (capped at maxDelayMs) |
 
+## Enterprise Resilience Features
+
+### Circuit Breaker
+
+Prevent cascading failures by automatically detecting when a service is failing:
+
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: '...',
+  consumerSecret: '...',
+  resilience: {
+    circuitBreaker: {
+      failureThreshold: 5,
+      successThreshold: 2,
+      timeout: 60000,
+    },
+  },
+});
+
+// When requests fail, circuit breaker opens automatically
+try {
+  const response = await mpesa.stkPush.initiate({...});
+} catch (error) {
+  if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+    console.log('Service is temporarily unavailable');
+  }
+}
+```
+
+See [Circuit Breaker Guide](../resilience/circuit-breaker) for detailed documentation.
+
+### Rate Limiting
+
+Control request rates to prevent overwhelming the API:
+
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: '...',
+  consumerSecret: '...',
+  resilience: {
+    rateLimiter: {
+      capacity: 100,
+      refillRate: 10,
+      refillInterval: 1000,
+    },
+  },
+});
+```
+
+See [Rate Limiter Guide](../resilience/rate-limiter) for detailed documentation.
+
+### Batch Requests
+
+Execute multiple operations concurrently with intelligent scheduling:
+
+```typescript
+const requests = [
+  { BusinessShortCode: 174379, Amount: 100, /* ... */ },
+  { BusinessShortCode: 174379, Amount: 200, /* ... */ },
+];
+
+const results = await mpesa.batch.executeStkPush(requests);
+```
+
+See [Batch Requests Guide](../resilience/batch-requests) for detailed documentation.
+
 ## Timeout Handling
 
 The SDK will throw a `TimeoutError` when a request exceeds the configured timeout.
@@ -104,3 +170,93 @@ try {
   }
 }
 ```
+
+## Combining Resilience Patterns
+
+For maximum resilience, combine multiple patterns:
+
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: process.env.MPESA_CONSUMER_KEY,
+  consumerSecret: process.env.MPESA_CONSUMER_SECRET,
+  environment: 'sandbox',
+  passkey: process.env.MPESA_PASSKEY,
+  resilience: {
+    circuitBreaker: {
+      failureThreshold: 5,
+      successThreshold: 2,
+      timeout: 60000,
+    },
+    rateLimiter: {
+      capacity: 100,
+      refillRate: 10,
+      refillInterval: 1000,
+    },
+    batch: {
+      maxConcurrent: 5,
+      timeout: 30000,
+      retryFailures: true,
+    },
+  },
+  retryConfig: {
+    maxRetries: 3,
+    baseDelayMs: 1000,
+    maxDelayMs: 30000,
+  },
+});
+```
+
+## Best Practices
+
+### 1. Handle Specific Error Types
+
+```typescript
+try {
+  const response = await mpesa.stkPush.initiate(request);
+} catch (error) {
+  if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+    // Service is degraded, use fallback
+  } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    // Implement exponential backoff
+  } else if (error instanceof TimeoutError) {
+    // Request timed out
+  } else {
+    // Other errors
+  }
+}
+```
+
+### 2. Implement Fallback Logic
+
+```typescript
+async function initiatePayment(request) {
+  try {
+    return await mpesa.stkPush.initiate(request);
+  } catch (error) {
+    if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+      // Use cached response or alternative method
+      return getCachedResponse(request.AccountReference);
+    }
+    throw error;
+  }
+}
+```
+
+### 3. Monitor Resilience Metrics
+
+Use the built-in metrics to monitor system health:
+
+```typescript
+const status = mpesa.getCircuitBreakerStatus();
+console.log('Circuit breaker:', status.state);
+
+const rateLimiterStatus = mpesa.getRateLimiterStatus();
+console.log('Available tokens:', rateLimiterStatus.availableTokens);
+```
+
+## Related Guides
+
+- [Circuit Breaker](../resilience/circuit-breaker) - Detailed circuit breaker guide
+- [Rate Limiter](../resilience/rate-limiter) - Rate limiting patterns
+- [Batch Requests](../resilience/batch-requests) - Batch execution guide
+- [Webhook Retry & DLQ](../resilience/webhook-dlq) - Webhook resilience
