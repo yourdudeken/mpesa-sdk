@@ -95,3 +95,39 @@ const isValid = webhooks.verifySignature(
   secret
 );
 ```
+
+## Webhook Retry and DLQ
+
+Enable automatic retries and a Dead Letter Queue (DLQ) for failed webhooks:
+
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: process.env.MPESA_CONSUMER_KEY!,
+  consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
+  environment: 'sandbox',
+  passkey: process.env.MPESA_PASSKEY!,
+  webhooks: {
+    retry: {
+      enabled: true,
+      maxRetries: 5,
+      initialDelayMs: 1000,
+      backoffMultiplier: 2,
+      maxDelayMs: 300000,
+    },
+    dlq: {
+      enabled: true,
+      storage: 'database',
+      databaseUrl: process.env.DLQ_DATABASE_URL,
+    },
+  },
+});
+```
+
+Monitor DLQ items and replay them when needed:
+
+```typescript
+const dlqItems = await mpesa.webhooks.getDLQItems();
+const replay = await mpesa.webhooks.replayAllDLQItems();
+```
+
+See [Webhook Retry & DLQ](./resilience/webhook-dlq) for full details.

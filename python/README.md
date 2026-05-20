@@ -54,6 +54,42 @@ print(f"Checkout ID: {response.CheckoutRequestID}")
 - Retry with exponential backoff
 - Pydantic v2 models for request/response validation
 
+### Enterprise Features
+
+- Circuit Breaker for automatic failure detection
+- Rate Limiting (token bucket algorithm)
+- Batch Requests for concurrent execution
+- Webhook Retry & DLQ for reliable delivery
+- OpenTelemetry Tracing and Prometheus Metrics
+
+### Example: Resilience Configuration
+
+```python
+client = Mpesa({
+    "consumer_key": "your_consumer_key",
+    "consumer_secret": "your_consumer_secret",
+    "environment": "sandbox",
+    "passkey": "your_passkey",
+    "resilience": {
+        "circuit_breaker": {
+            "failure_threshold": 5,
+            "success_threshold": 2,
+            "timeout": 60000,
+        },
+        "rate_limiter": {
+            "capacity": 100,
+            "refill_rate": 10,
+            "refill_interval": 1000,
+        },
+        "batch": {
+            "max_concurrent": 5,
+            "timeout": 30000,
+            "retry_failures": True,
+        },
+    },
+})
+```
+
 ## Documentation
 
 Full documentation: [https://yourdudeken.github.io/mpesa-sdk](https://yourdudeken.github.io/mpesa-sdk)

@@ -15,6 +15,20 @@ A: Tokens expire after 3600 seconds (1 hour). The SDK handles refresh automatica
 **Q: What are the transaction limits?**
 A: Min Ksh 1, Max per transaction Ksh 250,000, Daily max Ksh 500,000.
 
+## Enterprise Features
+
+**Q: Does the SDK include circuit breaker support?**
+A: Yes. Configure it under `resilience.circuitBreaker` (TypeScript), `resilience.circuit_breaker` (Python), or `Resilience.CircuitBreaker` (Go). See the Circuit Breaker guide.
+
+**Q: How does rate limiting work?**
+A: The SDK uses a token bucket rate limiter. Configure `capacity`, `refillRate`, and `refillInterval` to match your traffic profile. See the Rate Limiter guide.
+
+**Q: What happens to failed webhooks?**
+A: Failed webhook deliveries are retried with exponential backoff and then placed into a Dead Letter Queue (DLQ) for manual replay. See the Webhook Retry & DLQ guide.
+
+**Q: Can I trace and measure SDK calls?**
+A: Yes. The SDK supports OpenTelemetry tracing and Prometheus-style metrics. See the Tracing and Metrics guides.
+
 ## STK Push
 
 **Q: Not receiving callbacks?**

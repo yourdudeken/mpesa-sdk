@@ -75,6 +75,43 @@ All methods accept `context.Context` and return typed responses.
 - `webhooks/` — Webhook event manager
 - `services/` — Higher-level service layer
 
+## Enterprise Features
+
+- Circuit Breaker for automatic failure detection
+- Rate Limiting with token bucket algorithm
+- Batch Requests for concurrent execution
+- Webhook Retry & DLQ for reliable delivery
+- OpenTelemetry Tracing and Prometheus Metrics
+
+### Example: Resilience Configuration
+
+```go
+mpesa := client.NewClient(types.MpesaConfig{
+    ConsumerKey:    os.Getenv("MPESA_CONSUMER_KEY"),
+    ConsumerSecret: os.Getenv("MPESA_CONSUMER_SECRET"),
+    Environment:    types.Sandbox,
+    Passkey:        os.Getenv("MPESA_PASSKEY"),
+    Resilience: &types.ResilienceConfig{
+        CircuitBreaker: &types.CircuitBreakerConfig{
+            FailureThreshold: 5,
+            SuccessThreshold: 2,
+            Timeout:          60000,
+        },
+        RateLimiter: &types.RateLimiterConfig{
+            Capacity:       100,
+            RefillRate:     10,
+            RefillInterval: 1000,
+        },
+        Batch: &types.BatchConfig{
+            MaxConcurrent:   5,
+            Timeout:         30000,
+            RetryFailures:   true,
+            ContinueOnError: true,
+        },
+    },
+})
+```
+
 ## Documentation
 
 Full documentation at [https://yourdudeken.github.io/mpesa-sdk](https://yourdudeken.github.io/mpesa-sdk)
