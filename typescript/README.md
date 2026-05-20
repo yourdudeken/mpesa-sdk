@@ -51,6 +51,42 @@ All methods return typed responses.
 | `mpesa.dynamicQR` | `generate()` |
 | `mpesa.webhooks` | `on()`, `off()`, `handleEvent()` |
 
+## Enterprise Features
+
+- **Circuit Breaker** for automatic failure detection
+- **Rate Limiting** with token bucket algorithm
+- **Batch Requests** for concurrent execution
+- **Webhook Retry & DLQ** for reliable delivery
+- **OpenTelemetry Tracing** and **Prometheus Metrics**
+
+### Example: Resilience Configuration
+
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: process.env.MPESA_CONSUMER_KEY!,
+  consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
+  environment: 'sandbox',
+  passkey: process.env.MPESA_PASSKEY!,
+  resilience: {
+    circuitBreaker: {
+      failureThreshold: 5,
+      successThreshold: 2,
+      timeout: 60000,
+    },
+    rateLimiter: {
+      capacity: 100,
+      refillRate: 10,
+      refillInterval: 1000,
+    },
+    batch: {
+      maxConcurrent: 5,
+      timeout: 30000,
+      retryFailures: true,
+    },
+  },
+});
+```
+
 ## Framework Integrations
 
 - **Express**: `createExpressMiddleware()`

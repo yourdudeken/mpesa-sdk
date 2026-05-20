@@ -249,7 +249,6 @@ Audit logs include:
 
 - [M-Pesa Security Documentation](https://developer.safaricom.et/)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Circuit Breaker Pattern](../resilience/circuit-breaker)
-- [Rate Limiting Guide](../resilience/rate-limiter)
-- [Webhook DLQ Guide](../resilience/webhook-dlq)
-
+- [Circuit Breaker Pattern](./resilience/circuit-breaker)
+- [Rate Limiting Guide](./resilience/rate-limiter)
+- [Webhook DLQ Guide](./resilience/webhook-dlq)

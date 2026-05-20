@@ -81,3 +81,38 @@ token, err := mpesa.tokenManager.GetToken(ctx)
 - Tokens are stored in memory only
 - HTTPS is enforced for all API calls
 - Basic Auth is only used for initial token acquisition
+
+## Resilience and Auth
+
+Authentication requests are protected by the same resilience layer:
+
+- Circuit breaker prevents repeated token acquisition failures
+- Rate limiter avoids token endpoint throttling
+- Retry with exponential backoff handles transient auth errors
+
+```typescript
+const mpesa = new Mpesa({
+  consumerKey: process.env.MPESA_CONSUMER_KEY!,
+  consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
+  environment: 'sandbox',
+  resilience: {
+    circuitBreaker: {
+      failureThreshold: 3,
+      successThreshold: 1,
+      timeout: 30000,
+    },
+    rateLimiter: {
+      capacity: 20,
+      refillRate: 2,
+      refillInterval: 1000,
+    },
+  },
+  retryConfig: {
+    maxRetries: 3,
+    baseDelayMs: 1000,
+    maxDelayMs: 10000,
+  },
+});
+```
+
+If auth fails repeatedly, the circuit breaker will open and return a `CIRCUIT_BREAKER_OPEN` error until recovery.

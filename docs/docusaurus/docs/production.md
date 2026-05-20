@@ -350,10 +350,9 @@ const replayed = await mpesa.webhooks.replayAllDLQItems();
 
 ## Related Resources
 
-- [Circuit Breaker Guide](../resilience/circuit-breaker)
-- [Rate Limiter Guide](../resilience/rate-limiter)
-- [Webhook DLQ Guide](../resilience/webhook-dlq)
-- [Tracing Guide](../observability/tracing)
-- [Metrics Guide](../observability/metrics)
+- [Circuit Breaker Guide](./resilience/circuit-breaker)
+- [Rate Limiter Guide](./resilience/rate-limiter)
+- [Webhook DLQ Guide](./resilience/webhook-dlq)
+- [Tracing Guide](./observability/tracing)
+- [Metrics Guide](./observability/metrics)
 - [Security Guide](./security)
-
