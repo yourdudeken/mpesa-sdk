@@ -153,3 +153,46 @@ The transaction moves money from your MMF/Working account to the recipient's mer
 | ResultParameters | JSON object with transaction details | JSON Object | |
 | TransactionID | Unique M-PESA transaction ID | String | OAK0000000 |
 | ReferenceData | JSON object with reference data | JSON Object | |
+
+## Testing
+
+### Option 1: Daraja Simulator
+Create a test app and use the simulator:
+1. Log in to Daraja Portal
+2. Navigate to Simulator section
+3. Use predefined test shortcodes
+4. Test with various transaction types
+
+### Option 2: Postman
+1. Generate access token via Authorization API
+2. Create request body with test data
+3. Include valid SecurityCredential (encrypted password)
+4. Submit to sandbox endpoint
+
+**Sandbox Endpoint:** `https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest`
+
+## Go Live
+
+### Requirements
+1. **Merchant Account:** Live M-Pesa Pay Bill or Till Number
+2. **Organization Details:** Business name, registration number
+3. **API Credentials:** Active API initiator on M-Pesa portal
+4. **Callback URLs:** HTTPS endpoints, publicly accessible
+
+### Steps
+1. Navigate to "Go Live" tab on Daraja Portal
+2. Submit live merchant details
+3. Configure live callback URLs
+4. Receive production API credentials
+
+**Production Endpoint:** `https://api.safaricom.co.ke/mpesa/b2b/v1/paymentrequest`
+
+## Best Practices
+- Verify all credentials before transmission
+- Implement proper error handling and retry logic
+- Log all transactions for audit trail
+- Regular reconciliation between API and statements
+
+## Support
+- **Email:** apisupport@safaricom.co.ke
+- **Chat:** Daraja Chatbot
