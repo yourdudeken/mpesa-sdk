@@ -33,18 +33,21 @@ The Authorization API generates access tokens required for authenticating all Da
 ## Integration Steps
 ### Generate an OAuth Access Token
 
-**Authorization:** Basic Auth (username/password)
+**Method:** GET
+
+**Authorization:** Basic Auth (Base64 encode Consumer Key:Consumer Secret)
+
+**URL:** `https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials`
 
 **Headers:**
-```json
-{
-  "Authorization": "Basic Q2RtTmJkdDBpQk4xb3FEZkthc200ZGFiZHBLbXRhTm46RExLRzdQQnVuNzIwR1ppbQ=="
-}
+```
+Authorization: Basic {Base64(ConsumerKey:ConsumerSecret)}
 ```
 
-**Params:**
-```
-grant_type: client_credentials
+**Example with curl:**
+```bash
+curl -X GET "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials" \
+  -H "Authorization: Basic Q2RtTmJkdDBpQk4xb3FEZkthc200ZGFiZHBLbXRhTm46RExLRzdQQnVuNzIwR1ppbQ=="
 ```
 
 ### Request Parameter Definition
@@ -79,11 +82,68 @@ grant_type: client_credentials
 ### Using the Simulator
 Safaricom provides an Authorization API Simulator for testing access token generation via the Daraja Portal.
 
+## Production Endpoints
+**Token Endpoint:** `https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials`
+
+Token expiry is 3600 seconds for both sandbox and production.
+
+## Code Examples
+
+### Python
+```python
+import requests
+import base64
+
+consumer_key = "YOUR_CONSUMER_KEY"
+consumer_secret = "YOUR_CONSUMER_SECRET"
+auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+
+credentials = f"{consumer_key}:{consumer_secret}"
+encoded = base64.b64encode(credentials.encode()).decode()
+
+headers = {"Authorization": f"Basic {encoded}"}
+response = requests.get(auth_url, headers=headers)
+token = response.json()["access_token"]
+```
+
+### JavaScript/Node.js
+```javascript
+const axios = require('axios');
+const base64 = require('base-64');
+
+const consumerKey = "YOUR_CONSUMER_KEY";
+const consumerSecret = "YOUR_CONSUMER_SECRET";
+const credentials = `${consumerKey}:${consumerSecret}`;
+const encoded = base64.encode(credentials);
+
+const config = {
+  headers: {"Authorization": `Basic ${encoded}`}
+};
+
+axios.get("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", config)
+  .then(response => console.log(response.data.access_token));
+```
+
+## Token Validation
+
+Tokens are valid for 3600 seconds (1 hour) from generation. When a token expires:
+- All API calls using the expired token will return 401 Unauthorized
+- A new token must be generated using the Authorization API
+- Implement token caching in your application to minimize API calls
+
+## Security Best Practices
+- Store Consumer Key and Consumer Secret securely (environment variables, vaults)
+- Do not hardcode credentials in source code
+- Rotate credentials periodically
+- Use HTTPS for all token requests
+- Implement token refresh logic before expiry (optional: refresh at 55 minutes)
+
 ## Support
 ### FAQs
 - **Why is my access token not working?** Tokens expire in 3600 seconds. Generate a new one if expired.
 - **What should I do if I get an invalid grant type error?** Ensure grant_type is set to `client_credentials`.
-- **Can I generate multiple tokens?** Yes, but each request invalidates the previous token.
+- **Can I generate multiple tokens?** Yes, but each request generates a unique token. Older tokens remain valid until expiry.
+- **How do I handle token expiration?** Implement token refresh logic or cache tokens until ~1 minute before expiry.
 
 ### Chatbot
 Developers can get instant responses using the Daraja Chatbot.
@@ -91,3 +151,4 @@ Developers can get instant responses using the Daraja Chatbot.
 ### Production Issues & Incident Management
 - **Incident Management Page:** Visit the Incident Management page
 - **Email:** apisupport@safaricom.co.ke
+- **Response Time:** Support team responds within business hours
